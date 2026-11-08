@@ -9,6 +9,7 @@
     "examples/real.json": "b638a298e7e75298914075cd19ae394e1da996f53026ef082a19b277c0895e11",
     "examples/retrain.json": "70f3ec1786da7898dd7a5a6612e59ec32ee8324a55dfcbe4244fb2d6ec8dfce8",
     "fno_adapter.py": "19a629d7d4755df119648fe6ba7e452fc5538738160b9c8a7426600e5e1df6aa",
+    "fno_gt_overlay.py": "bbaba8778d22ccb8e105468fe4f9f805eeee2cfdb43c2c447b00eb3208afdf19",
     "harness.py": "0db57bc76a9ef21593dc04e82689ecb4d5404166990a12e5675cde9313481829",
     "harness_inputs/evaluations/fno_onestep_v1_bad_data.json": "2e5c19ce09f5884cae1a155a70124ac7d007232baef9b97d87bff0bfcc610839",
     "harness_inputs/evaluations/fno_rollout_v1_missing_metric.json": "a70f0d58320ab0e0e6691c849d9a083bff88cd1d056c54b3ff163af1137ee745",
@@ -18,12 +19,13 @@
     "harness_inputs/scenarios.json": "15228be4261fd2c5ac8898d18a9030a31820b9ca8a78d29c20d59f8e6a27be78",
     "inspect_results.py": "d2acf0da48d0970942d9dc27b80e02f822ba0ded26b3a0c1a108d192a680ac5b",
     "mgn_adapter.py": "ccaa5231e30d47731abb1f7609d8143d0c0c56c831cda0e4ce6acde48aeb9d09",
-    "mgn_geometry.py": "cd7e1e4a828876caccec4912da449d66f7e03f71fcba15e74978721bf60944b0",
+    "mgn_geometry.py": "63354669806863dfdeab8177fcb7feb7852438cdc8b7b92ae8bedcf11d4b8731",
     "mgn_gt_overlay.py": "9e1b981d571582d61d4ad79d616d40871d814e84550eed116c5e4dadb58bb23c",
     "run_demo.py": "8598bba468382c3092cd44e4cb8990cce7ba20c3a84a8f9dfebfc39f94c658a4",
     "run_review.py": "26686a386ba757bcf38c4267f4dc92b61de7c86a4e8f2aeb44d7196df746e4bf",
     "test_controller.py": "eba34f184d61e9a2f5f95d21731c110e8a5e317f0f336fec25e8571467245cfb",
     "test_fno_adapter.py": "ab272904359f61985d0856c41ae313df4e465dcbaaf5fd57865f793331c8850e",
+    "test_fno_gt_overlay.py": "e39c50c9b7733f76664b115e279c31cb88d3186316ee9654646708a8319c1c47",
     "test_harness.py": "184aeb11f86c7c56ac0dbcba1d95479aed82266b9f4cec5b1269fb603bca795a",
     "test_inspect_results.py": "ffe669f21de0b897cd9d2a9c6e87bbbf692e8c8ee0608d3689263f8260830275",
     "test_mgn_adapter.py": "a1685999cdf95d2b3437e1cdcd4e59b9170e5f64a363e886ddcdcb5c9e6c4abd",
@@ -36,6 +38,6 @@
     "thresholds_mgn_provisional.json": "4e480b5b31ee8f7e85f3197d29c12ef8c9f90722de508601166207e5fc2384f8",
     "임시기준_및_연결방법.md": "26f4ca40c6543bed3ae8d1c52efb4929e84704973e4b7e27b71cad33a7a87ede"
   },
-  "note": "Python files in this copy may be formatted for repository lint. Original local files are unchanged. 2026-11-09: added FNO/MGN real-score adapters and run_review.py; the repository copy is ruff-formatted, local inputs are configured in local_paths.json (not committed). 2026-11-09 (2): added mgn_geometry.py (optional NPZ segment check) and mgn_gt_overlay.py (prediction vs ground-truth overlay); ground-truth data is not committed.",
+  "note": "Python files in this copy may be formatted for repository lint. Original local files are unchanged. 2026-11-09: added FNO/MGN real-score adapters and run_review.py; the repository copy is ruff-formatted, local inputs are configured in local_paths.json (not committed). 2026-11-09 (2): added mgn_geometry.py (optional NPZ segment check) and mgn_gt_overlay.py (prediction vs ground-truth overlay); ground-truth data is not committed. 2026-11-09 (3): added fno_gt_overlay.py (FNO sample SDF contour vs ground truth); mgn_geometry.read_npy gained an optional allowed_ndim argument (default unchanged).",
   "updated_date": "2026-11-09"
 }

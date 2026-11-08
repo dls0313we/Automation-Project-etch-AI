@@ -16,7 +16,7 @@ Python 3.11 이상을 준비한다. 이 폴더의 실행에는 추가 패키지�
 
 ```text
 cd prototypes/threshold_controller
-python -m unittest -v test_controller.py test_inspect_results.py test_harness.py test_fno_adapter.py test_mgn_adapter.py test_run_review.py test_mgn_geometry.py test_mgn_gt_overlay.py
+python -m unittest -v test_controller.py test_inspect_results.py test_harness.py test_fno_adapter.py test_mgn_adapter.py test_run_review.py test_mgn_geometry.py test_mgn_gt_overlay.py test_fno_gt_overlay.py
 python harness.py --demo
 ```
 
@@ -35,9 +35,10 @@ APPROVE_CANDIDATE를 만든다. 결과는 `harness_results/<실행시각>/`에 �
 | `thresholds_demo_relaxed.json` | MGN rollout 상한 완화 및 기준 버전 기록 시연 |
 | `harness_inputs/evaluations/` | 실제 측정값이 아닌 가상 평가 결과 |
 | `harness_inputs/scenarios.json` | 기본 시연 5개 |
-| `test_*.py` | 판정 15 + CSV 점검 11 + 하네스 14 + FNO 연결 21 + MGN 연결 17 + 통합 12 + 형상 검사 29 + 정답 비교 11 = 130개 검사 |
+| `test_*.py` | 판정 15 + CSV 점검 11 + 하네스 14 + FNO 연결 21 + MGN 연결 17 + 통합 12 + 형상 검사 29 + MGN 정답 비교 11 + FNO 정답 비교 17 = 147개 검사 |
 | `mgn_geometry.py` | 선택형 MGN 선분 교차·중첩·중복 연결 검사 |
 | `mgn_gt_overlay.py` | validation 사례의 예측·정답 형상 비교 보고서 |
+| `fno_gt_overlay.py` | FNO 샘플 SDF 경계와 정답 형상 비교 보고서 |
 | `inspect_results.py` | 기존 6epoch MGN 평가 CSV의 데이터/집계 점검 |
 | `examples/`, `run_demo.py` | 기존 판정기 사례 시연 |
 
@@ -160,6 +161,23 @@ python mgn_gt_overlay.py
 - [제안] 보고서는 검출 사실만 보여 준다. 예측 오류의 원인이나 재학습 필요성을 단정하지 않으며
   `reference_verified`는 `false`로 유지한다.
 - [미확인] 중복 연결이 형상 이상인지 출력 형식 문제인지는 MGN 담당 확인이 필요하다.
+
+## FNO 샘플 정답 형상 비교 (2026-11-09)
+
+[확인] `fno_gt_overlay.py`는 FNO 샘플(`samples_main_s1`)의 SDF `phi`에서 φ=0 경계를 추출해
+같은 레시피·단계의 정답 VTP와 겹친 `fno_gt_overlay_results/<실행시각>/report.html`을 만든다.
+
+```text
+python fno_gt_overlay.py
+```
+
+- 입력: `local_paths.json`의 `fno_samples`와 `mgn_gt_zip`(정답 ZIP). 정답 ZIP 해시가 기록값과 다르면 중단한다.
+- 단계 대응: `phi[index]`의 `step[index]=k` ↔ `t<k>.vtp`. 스냅샷 번호·`actual_k`와
+  샘플 README의 레시피 파라미터 7개가 정답 `meta.json`과 모두 같아야 진행한다.
+- 경계 추출: marching squares(선형 보간, 음수=고체, 안장점은 음수 상 연결). 이 추출은 구성상
+  선 교차를 만들지 않으므로 자기교차 여부나 형상 합격을 판단하지 않는다.
+- 제공된 샘플 3개 레시피만 확인하며 전체 validation 판정이 아니다. 바닥 CD는 측정 높이 기준이 미확정이라
+  재계산하지 않는다. `reference_verified`는 `false`, 형상 이상 건수는 계속 미측정이다.
 
 ## 기존 파이프라인과 관계
 

@@ -51,7 +51,7 @@ class GeometryFormatError(ValueError):
     """Unsupported or inconsistent numeric-array layout."""
 
 
-def read_npy(blob):
+def read_npy(blob, *, allowed_ndim=(1, 2)):
     """Read bounded C-order numeric NPY 1/2/3; reject object/structured arrays."""
     if len(blob) < 10 or blob[:6] != b"\x93NUMPY":
         raise GeometryFormatError("Invalid NPY magic/header")
@@ -93,10 +93,10 @@ def read_npy(blob):
         raise GeometryFormatError(f"Unsupported numeric dtype {descr}")
     if (
         not isinstance(shape, tuple)
-        or len(shape) not in (1, 2)
+        or len(shape) not in allowed_ndim
         or any(isinstance(v, bool) or not isinstance(v, int) or v < 0 for v in shape)
     ):
-        raise GeometryFormatError("Expected a one/two-dimensional numeric array")
+        raise GeometryFormatError(f"Expected numeric array with dimension in {allowed_ndim}")
     count = math.prod(shape)
     width = int(descr[2:])
     data = blob[8 + size + n :]
