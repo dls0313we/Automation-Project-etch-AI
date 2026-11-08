@@ -7,6 +7,8 @@ inspection_results/
 fno_adapter_results/
 mgn_adapter_results/
 review_results/
+mgn_geometry_results/
+gt_overlay_results/
 # machine-specific input locations and real evaluation inputs
 local_paths.json
 inputs/

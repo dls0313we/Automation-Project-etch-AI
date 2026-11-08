@@ -16,7 +16,7 @@ Python 3.11 이상을 준비한다. 이 폴더의 실행에는 추가 패키지�
 
 ```text
 cd prototypes/threshold_controller
-python -m unittest -v test_controller.py test_inspect_results.py test_harness.py test_fno_adapter.py test_mgn_adapter.py test_run_review.py
+python -m unittest -v test_controller.py test_inspect_results.py test_harness.py test_fno_adapter.py test_mgn_adapter.py test_run_review.py test_mgn_geometry.py test_mgn_gt_overlay.py
 python harness.py --demo
 ```
 
@@ -35,7 +35,9 @@ APPROVE_CANDIDATE를 만든다. 결과는 `harness_results/<실행시각>/`에 �
 | `thresholds_demo_relaxed.json` | MGN rollout 상한 완화 및 기준 버전 기록 시연 |
 | `harness_inputs/evaluations/` | 실제 측정값이 아닌 가상 평가 결과 |
 | `harness_inputs/scenarios.json` | 기본 시연 5개 |
-| `test_*.py` | 판정 15 + CSV 점검 11 + 하네스 14 + FNO 연결 21 + MGN 연결 17 + 통합 12 = 90개 검사 |
+| `test_*.py` | 판정 15 + CSV 점검 11 + 하네스 14 + FNO 연결 21 + MGN 연결 17 + 통합 12 + 형상 검사 29 + 정답 비교 11 = 130개 검사 |
+| `mgn_geometry.py` | 선택형 MGN 선분 교차·중첩·중복 연결 검사 |
+| `mgn_gt_overlay.py` | validation 사례의 예측·정답 형상 비교 보고서 |
 | `inspect_results.py` | 기존 6epoch MGN 평가 CSV의 데이터/집계 점검 |
 | `examples/`, `run_demo.py` | 기존 판정기 사례 시연 |
 
@@ -133,6 +135,31 @@ python run_review.py       # 두 연결기를 함께 실행 → review_results/<
   FNO CD 높이 기준, 정답 자료 대조는 확인하지 않았다.
 - 입력이 없거나 한쪽 연결기가 실패하면 해당 조합을 실패와 이유로 표시하고 종료 코드 1을 돌려준다.
   과거 결과를 최신 결과처럼 보여주지 않는다.
+
+## MGN 선분 형상 검사와 정답 비교 (2026-11-09)
+
+[확인] `mgn_geometry.py`는 MGN 예측 NPZ의 선분 그래프를 표준 라이브러리로 읽어(pickle 거부)
+교차·서로 다른 선분의 중첩·중복 연결·구조 이상을 프레임 단위로 센다(`mgn-segment-geometry-v2`, 허용치 1e-8 µm).
+`run_review.py --check-mgn-geometry` 또는 `mgn_adapter.py --check-geometry`로 선택 실행하며,
+제공 Chamfer 점수는 바꾸지 않는다.
+
+[확인] `mgn_gt_overlay.py`는 선택한 validation 사례의 예측과 정답 VTP를 같은 검사로 비교하고
+겹친 그림이 있는 `gt_overlay_results/<실행시각>/report.html`을 만든다.
+
+```text
+python mgn_gt_overlay.py
+```
+
+- 정답: Hugging Face `code5312/etch-ai-automation-data`의 `etch-raw-n400.zip`
+  (실행 기록 revision `40fcc746ed9654d89a1d6d4aa3cc8c5d4c076868`,
+  SHA256 `4df39525896536a84e5337dfe196833c7497b6215865c0fc93c1bda87f64b011`).
+  저장소에 포함하지 않으며 위치는 `local_paths.json`의 `mgn_gt_zip`에 적는다.
+- 단계 대응은 파일명 번호(예측 k ↔ `t<k>.vtp`, t000=초기 형상)로만 하고, 스냅샷 개수·`actual_k`·
+  마지막 정답 점 수(`n_gt_points`)·t000 깊이 중 하나라도 어긋나면 그림을 만들지 않고 중단한다.
+- 사례는 validation에서만 고른다. 정답에도 같은 `check_frame`과 허용치를 적용한다.
+- [제안] 보고서는 검출 사실만 보여 준다. 예측 오류의 원인이나 재학습 필요성을 단정하지 않으며
+  `reference_verified`는 `false`로 유지한다.
+- [미확인] 중복 연결이 형상 이상인지 출력 형식 문제인지는 MGN 담당 확인이 필요하다.
 
 ## 기존 파이프라인과 관계
 

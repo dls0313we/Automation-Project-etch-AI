@@ -2,8 +2,9 @@
 
 Jinju's mgn_main_s1_nov9 folder -> harness inputs, provisional comparison, decision.
 Reads README.json, metrics_by_step.csv and summary_last_step.csv. Read-only on sources;
-.npz/.png are hashed only. Does not compute new geometry metrics, train, replace models
-or call external services. Standard library only.
+.npz/.png are normally hashed only. --check-geometry additionally inspects NPZ segment
+graphs without changing the provided Chamfer scores. No training or model replacement.
+Standard library only.
 
   python mgn_adapter.py
   python mgn_adapter.py --input <mgn folder> [--thresholds thresholds_mgn_provisional.json]
@@ -31,6 +32,7 @@ from collections import Counter, defaultdict
 from datetime import datetime
 from pathlib import Path
 
+import mgn_geometry
 from fno_adapter import (
     Problems,
     fmt,
@@ -340,7 +342,7 @@ def payload(mode, summary_entry, data_check, readme, dataset_id):
     )
 
 
-def unverified(readme):
+def unverified(readme, geometry=None):
     """Open questions, kept apart from the decision."""
     items = [
         "Validation split r0300-r0339 was used to pick the rollout spacing "
@@ -357,6 +359,23 @@ def unverified(readme):
         ".npz/.png were hashed only, not parsed.",
         "Provisional limits are arbitrary starting values, not team-approved.",
     ]
+    if geometry is not None:
+        items = [
+            x
+            for x in items
+            if not x.startswith(
+                ("Self-intersections remain", "Prediction point count/order differ")
+            )
+        ]
+        items += [
+            f"Prediction NPZ segment graphs were inspected under {mgn_geometry.CONTRACT}; "
+            "PNG images remain unparsed. Numeric counts do not verify physical validity.",
+            f"Geometry scan read errors: {len(geometry['errors'])}; "
+            "an incomplete split/mode retains an unknown count.",
+            "Duplicate node-pair connections are an output-connectivity issue, reported separately "
+            "from geometric overlaps. Their physical-gate treatment needs Jinju's confirmation; "
+            "the provisional problem-frame union currently still includes them.",
+        ]
     return dict(
         items=items,
         readme_limitations=list(readme.get("limitations") or []),
@@ -374,9 +393,11 @@ def recipes_over(rows, limit):
     return dict(recipes_over_provisional_max=len(over), rids=over)
 
 
-def report(readme, sources_n, inspection, summary, comparisons, decisions, open_items):
+def report(
+    readme, sources_n, inspection, summary, comparisons, decisions, open_items, geometry=None
+):
     L = [
-        "# MGN 평가 점수 변환 결과 (진주 제공 mgn_main_s1_nov9, 새 지표 계산 없음)",
+        "# MGN 평가 점수 변환 결과 (제공 Chamfer 유지, 선택형 선분 형상 검사)",
         "",
         f"모델: {readme.get('model')} (sha256_16 {readme.get('model_sha256_16')}), "
         f"작성 {readme.get('author')} {readme.get('date')}",
@@ -384,7 +405,11 @@ def report(readme, sources_n, inspection, summary, comparisons, decisions, open_
         "",
         "!! 제공 설명: 교차(자기교차) 있는 레시피가 남아 있음 — "
         "Chamfer만으로 합격 판단 금지 (README limitations)",
-        "   자기교차 건수·레시피는 제공되지 않아 미측정이며 0으로 채우지 않음.",
+        (
+            "   이번 실행의 선분 형상 검사 결과는 아래에 별도 기록."
+            if geometry is not None
+            else "   자기교차 건수·레시피는 제공되지 않아 미측정이며 0으로 채우지 않음."
+        ),
         "",
     ]
     dc = inspection["data_check"]
@@ -395,6 +420,22 @@ def report(readme, sources_n, inspection, summary, comparisons, decisions, open_
     )
     for k, n in inspection["consistency_evidence"].items():
         L.append(f"  {k}: {n}건")
+    if geometry is not None:
+        L += ["", "## 선분 형상 검사 (예측 프레임 수, 교차 쌍 수와 구분)"]
+        for key, g in geometry["groups"].items():
+            L.append(
+                f"  {key}: 검사 {g['frames_checked']}/{g['frames_expected']}, "
+                f"이상 프레임 {fmt(g['invalid_geometry_count'])}, "
+                f"교차 프레임 {g['self_intersection_frame_count']}, "
+                f"중첩 프레임 {g['overlap_frame_count']}, "
+                f"중복 연결 프레임 {g['duplicate_edge_frame_count']}, "
+                f"이상 레시피 {g['affected_recipe_count']}개 {g['affected_recipe_ids']}"
+            )
+        L.append(
+            "  세부: geometry_diagnostics.json / geometry_frames.csv. "
+            "끝점 접촉은 별도 진단이며 단독으로 이상 건수에 포함하지 않음."
+        )
+        L.append(f"  읽기 오류 {len(geometry['errors'])}건; 미완료 집계 건수는 미측정.")
     L += ["", "## 점수 요약 (Chamfer, um)"]
     for key, s in summary.items():
         c = s["chamfer_um"]
@@ -413,8 +454,14 @@ def report(readme, sources_n, inspection, summary, comparisons, decisions, open_
                 f"{fmt(s['reported_last_step_onestep_chamfer_um']['mean'])} — "
                 "단계 평균과 다른 값, 점수로 쓰지 않음"
             )
-    L += ["", "## 제공되지 않은 지표 (0으로 채우지 않음)"] + [
-        f"  - {k}: {v}" for k, v in NOT_PROVIDED.items()
+    missing = dict(NOT_PROVIDED)
+    if geometry is not None:
+        missing["invalid_geometry_count"] = (
+            "See split/mode geometry scan; incomplete scans remain unknown."
+        )
+        missing["self_intersection"] = "See proper crossing counts in geometry_diagnostics.json."
+    L += ["", "## 제공되지 않은 지표 / 별도 검사 상태"] + [
+        f"  - {k}: {v}" for k, v in missing.items()
     ]
     L += ["", "## [임시 비교] validation 실제 점수 vs MGN 임시 기준 — 공식 판정 아님"]
     for mode, c in comparisons.items():
@@ -445,7 +492,7 @@ def report(readme, sources_n, inspection, summary, comparisons, decisions, open_
     return "\n".join(L) + "\n"
 
 
-def run(folder, thresholds, output_root):
+def run(folder, thresholds, output_root, *, check_geometry=False):
     folder = Path(folder)
     files = sorted(p for p in folder.iterdir() if p.is_file()) if folder.is_dir() else []
     sources = {
@@ -480,6 +527,30 @@ def run(folder, thresholds, output_root):
     )
     recipes = per_recipe(series, summary_rows)
     summary = summarize(recipes)
+    geometry = None
+    if check_geometry and series:
+        expected = [
+            dict(rid=rid, split=SPLIT_MAP[items[0]["split"]], steps=[x["step"] for x in items])
+            for rid, items in sorted(series.items())
+            if items[0]["split"] in SPLIT_MAP
+            and [x["step"] for x in items] == list(range(1, len(items) + 1))
+        ]
+        geometry = mgn_geometry.scan_dataset(folder, expected)
+        for key, group in geometry["groups"].items():
+            if key in summary:
+                summary[key]["geometry"] = group
+                if group["complete"]:
+                    summary[key]["not_provided"] = [
+                        k
+                        for k in summary[key]["not_provided"]
+                        if k not in ("invalid_geometry_count", "self_intersection")
+                    ]
+        for name, meta in sources.items():
+            if Path(name).name in geometry["files_sha256"]:
+                meta["parsed"] = not any(e["source"] == Path(name).name for e in geometry["errors"])
+                meta["note"] = (
+                    "Numeric NPZ geometry scan; errors/completeness in geometry_diagnostics.json"
+                )
     dataset_id = (
         f"mgn_main_s1_nov9_val_{sha256(folder / 'metrics_by_step.csv')[:12]}"
         if series
@@ -492,6 +563,21 @@ def run(folder, thresholds, output_root):
         if entry is None:
             continue
         inputs[mode] = payload(mode, entry, data_check, readme, dataset_id)
+        group = (geometry or {}).get("groups", {}).get(f"validation/{mode}")
+        if group is not None:
+            inputs[mode]["geometry"] = group
+            inputs[mode]["geometry_contract"] = mgn_geometry.DEFINITION
+            if group["complete"]:
+                inputs[mode]["metrics"]["invalid_geometry_count"] = group["invalid_geometry_count"]
+                inputs[mode]["metric_aggregation"]["invalid_geometry_count"] = (
+                    f"Unique problem prediction frames across all steps; {mgn_geometry.CONTRACT}; "
+                    "includes output-connectivity duplicates as a provisional diagnostic"
+                )
+                inputs[mode]["not_provided"] = [
+                    k
+                    for k in inputs[mode]["not_provided"]
+                    if k not in ("invalid_geometry_count", "self_intersection")
+                ]
         policy, decision = judge(inputs[mode], policies)
         if decision["training_started"] or decision["active_model_changed"]:
             raise AssertionError("The adapter must only decide and record.")
@@ -501,6 +587,11 @@ def run(folder, thresholds, output_root):
                 remaining_blockers(inputs[mode], policy) if policy else []
             ),
         )
+        if group is not None and group["complete"] and group["invalid_geometry_count"] > 0:
+            decisions[mode]["remaining_blockers_even_if_approved"].append(
+                f"Geometry scan found {group['invalid_geometry_count']} invalid prediction frames; "
+                "quality limits would still fail even after threshold approval."
+            )
         if policy is not None:
             comparisons[mode] = dict(
                 provisional_comparison(inputs[mode], policy),
@@ -509,11 +600,13 @@ def run(folder, thresholds, output_root):
                     (policy.get("max_metrics") or {}).get("chamfer_um_recipe_mean"),
                 ),
             )
+            if group is not None:
+                comparisons[mode]["geometry"] = group
     if not inputs:
         from controller import outcome
 
         decisions["none"] = outcome("DATA_REVIEW", ["No usable validation rows."], {}, {})
-    open_items = unverified(readme)
+    open_items = unverified(readme, geometry)
     test_record = {k: v for k, v in summary.items() if k.startswith("test/")}
     if {p: sha256(p) for p in sources} != {p: v["sha256"] for p, v in sources.items()}:
         raise AssertionError("A source file changed during conversion.")
@@ -542,7 +635,16 @@ def run(folder, thresholds, output_root):
             by_mode=test_record,
         ),
     )
-    write_json(out / "not_provided.json", NOT_PROVIDED)
+    missing = dict(NOT_PROVIDED)
+    if geometry is not None:
+        for name in ("invalid_geometry_count", "self_intersection"):
+            missing[name] = (
+                "Not provided by the model team; locally inspected in this run. "
+                "See geometry_diagnostics.json for completeness and measured counts."
+            )
+    write_json(out / "not_provided.json", missing)
+    if geometry is not None:
+        mgn_geometry.write_outputs(out, geometry)
     for mode, p in inputs.items():
         write_json(out / f"harness_input_validation_{mode}.json", p)
     write_json(
@@ -554,7 +656,9 @@ def run(folder, thresholds, output_root):
         dict(thresholds=str(thresholds), split="validation", by_mode=decisions),
     )
     write_json(out / "unverified.json", open_items)
-    text = report(readme, len(sources), inspection, summary, comparisons, decisions, open_items)
+    text = report(
+        readme, len(sources), inspection, summary, comparisons, decisions, open_items, geometry
+    )
     (out / "report.txt").write_text(text, encoding="utf-8")
     return (
         out,
@@ -567,6 +671,7 @@ def run(folder, thresholds, output_root):
             decisions=decisions,
             unverified=open_items,
             recipes=recipes,
+            geometry=geometry,
         ),
     )
 
@@ -578,10 +683,17 @@ def main():
     parser.add_argument("--input", default=str(DEFAULT_INPUT))
     parser.add_argument("--thresholds", default=str(DEFAULT_THRESHOLDS))
     parser.add_argument("--output-root", default=str(ROOT / "mgn_adapter_results"))
+    parser.add_argument(
+        "--check-geometry", action="store_true", help="inspect numeric NPZ segment geometry"
+    )
     args = parser.parse_args()
-    out, text, _ = run(args.input, args.thresholds, args.output_root)
+    out, text, result = run(
+        args.input, args.thresholds, args.output_root, check_geometry=args.check_geometry
+    )
     print(text)
     print("결과 폴더:", out)
+    if args.check_geometry and (result["geometry"] is None or result["geometry"]["errors"]):
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

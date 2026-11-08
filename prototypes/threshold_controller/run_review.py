@@ -18,6 +18,7 @@ import argparse
 import html
 import json
 import traceback
+from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
@@ -96,6 +97,16 @@ def combo(model, mode, run_info, extra_unmeasured):
     rows = []
     for row in (c or {}).get("rows", []):
         e = exceed.get(row["metric"])
+        if row["metric"] == "invalid_geometry_count" and p.get("geometry"):
+            g = p["geometry"]
+            limit = row["provisional_max"]
+            counts = Counter(x["rid"] for x in g["affected_frames"])
+            ids = sorted(
+                rid
+                for rid, count in counts.items()
+                if isinstance(limit, (int, float)) and not isinstance(limit, bool) and count > limit
+            )
+            e = dict(recipes_over_provisional_max=len(ids), rids=ids) if g["complete"] else None
         rows.append(
             dict(
                 row,
@@ -116,6 +127,7 @@ def combo(model, mode, run_info, extra_unmeasured):
         metric_aggregation=p["metric_aggregation"],
         metrics=p["metrics"],
         reported_not_judged=p.get("reported_not_judged"),
+        geometry=p.get("geometry"),
         provisional=dict(
             label=(c or {}).get("label"),
             policy_version=(c or {}).get("policy_version"),
@@ -150,6 +162,7 @@ def model_block(name, run_info):
         block["data_check"] = insp["data_check"]
         block["problem_counts"] = insp["problem_counts"]
         if name == "MGN":
+            block["geometry"] = run_info["result"].get("geometry")
             block["unverified"] = run_info["result"]["unverified"]["items"]
             block["test_reference"] = {
                 k: dict(
@@ -272,7 +285,7 @@ def combo_card(c):
         f'<div class="card">{head}<p><span class="pill {e(d["action"])}">{e(d["action"])} '
         f"({e(ACTION_KO.get(d['action'], ''))})</span></p>"
         f'<p class="muted">모델 {e(c["model_version"])}<br>'
-        f"레시피 {e(c['recipe_count'])}개 · 데이터 점검 "
+        f"레시피 {e(c['recipe_count'])}개 · 평가표 점검 "
         f"{'통과' if c['data_check']['passed'] else '실패'}</p></div>"
     )
 
@@ -324,13 +337,13 @@ def combo_detail(c):
 <tr><th>레시피 간 집계</th><td>{e(agg.get("over_recipes"))}</td></tr>
 <tr><th>Chamfer 정의</th><td>{e(agg.get("chamfer_definition"))}</td></tr>
 <tr><th>단위</th><td>{e(units)}</td></tr>
-<tr><th>데이터 점검</th><td>passed={e(dc["passed"])},
+<tr><th>평가표 점검</th><td>passed={e(dc["passed"])},
 invalid_recipe_count={e(dc["invalid_recipe_count"])},
 reference_verified={e(dc["reference_verified"])}</td></tr>
 </table></div>
 <h3 style="margin-top:14px">[임시 비교] 공식 판정 아님 ·
 기준 {e(pv["policy_version"])} (status={e(pv["policy_status"])})</h3>
-<div class="card"><table><tr><th>지표</th><th>단위</th><th>평균 점수</th><th>임시 상한</th>
+<div class="card"><table><tr><th>지표</th><th>단위</th><th>관측값</th><th>임시 상한</th>
 <th>결과</th><th>상한 초과 레시피 수</th><th>초과 ID</th></tr>{rows}</table>{reported}</div>
 <h3 style="margin-top:14px">[최종 판정]</h3>
 <div class="card"><p><span class="pill {e(d["action"])}">{e(d["action"])}
@@ -372,6 +385,44 @@ def render_html(s):
             "Chamfer만으로 합격 판단 금지. "
             "자기교차 건수는 제공되지 않아 미측정입니다.</div>"
         )
+        if mgn.get("geometry") is not None:
+            selfx = (
+                '<div class="banner warn">MGN 제공 설명: 교차(자기교차) 있는 레시피가 남아 있음. '
+                "이번 실행에서 선분 교차·중첩·구조 이상을 검사했습니다. "
+                "아래 형상 검사에서 프레임 수와 레시피 수를 구분해 확인하세요.</div>"
+            )
+    geometry_section = ""
+    if mgn.get("geometry") is not None:
+        geo = mgn["geometry"]
+        geo_rows = ""
+        for key, g in geo["groups"].items():
+            role = "참고 기록만" if key.startswith("test/") else "validation 임시 비교에 반영"
+            affected = ", ".join(g["affected_recipe_ids"])
+            steps = ", ".join(f"{x['rid']}:t{x['step']:03d}" for x in g["affected_frames"])
+            geo_rows += (
+                f"<tr><td>{e(key)}<br>{e(role)}</td>"
+                f"<td>{e(g['frames_checked'])}/{e(g['frames_expected'])}</td>"
+                f"<td>{num(g['invalid_geometry_count'])}</td>"
+                f"<td>{e(g['self_intersection_frame_count'])}</td>"
+                f"<td>{e(g['overlap_frame_count'])}</td>"
+                f"<td>{e(g['duplicate_edge_frame_count'])}</td>"
+                f"<td>{e(g['affected_recipe_count'])}</td>"
+                f"<td><details><summary>레시피·단계 보기</summary><p>{e(affected)}</p>"
+                f"<p>{e(steps)}</p></details></td></tr>"
+            )
+        geometry_section = (
+            '<h2>MGN 선분 형상 검사</h2><div class="card">'
+            "<p>이상 건수는 문제가 있는 예측 프레임 수입니다. 교차와 중첩이 함께 있는 "
+            "프레임도 한 번만 셉니다. 끝점 접촉은 별도 진단입니다. "
+            "동일한 두 노드의 중복 연결은 출력 구조 문제로 분리하고 "
+            "서로 다른 선분의 중첩에서는 제외합니다. "
+            "물리 정확도와 정답 검증은 포함하지 않습니다.</p>"
+            "<table><tr><th>구분·용도</th><th>검사 프레임</th><th>이상 프레임</th>"
+            "<th>교차 프레임</th><th>서로 다른 선분 중첩</th><th>중복 연결 프레임</th>"
+            "<th>이상 레시피 수</th><th>ID·단계</th></tr>"
+            f"{geo_rows}</table><p>읽기 오류 {e(len(geo['errors']))}건. "
+            "검사가 미완료인 집계는 미측정으로 남깁니다.</p></div>"
+        )
     test_rows = ""
     for k, v in (mgn.get("test_reference") or {}).items():
         ch = v["chamfer_um"]
@@ -410,6 +461,7 @@ def render_html(s):
 학습 시작 {e(s["training_started"])} · 모델 교체 {e(s["active_model_changed"])}</p>
 <div class="banner warn">{e(s["notice"])}</div>
 {fail_banner}{selfx}
+{geometry_section}
 <h2>연결 상태</h2><div class="card"><table><tr><th>모델</th><th>상태</th>
 <th>실패 이유</th><th>연결기 결과 폴더</th></tr>{status_rows}</table></div>
 <h2>4개 조합 판정</h2><div class="grid">{cards}</div>
@@ -444,7 +496,9 @@ def run(args, output_root):
     mgn = run_model(
         "MGN",
         [args.mgn_input, args.mgn_thresholds],
-        lambda: mgn_adapter.run(args.mgn_input, args.mgn_thresholds, out / "mgn"),
+        lambda: mgn_adapter.run(
+            args.mgn_input, args.mgn_thresholds, out / "mgn", check_geometry=args.check_mgn_geometry
+        ),
     )
     summary = build_summary(started, args, fno, mgn)
     if summary["training_started"] or summary["active_model_changed"]:
@@ -464,6 +518,11 @@ def parser():
     p.add_argument("--mgn-input", default=str(mgn_adapter.DEFAULT_INPUT))
     p.add_argument("--mgn-thresholds", default=str(mgn_adapter.DEFAULT_THRESHOLDS))
     p.add_argument("--output-root", default=str(ROOT / "review_results"))
+    p.add_argument(
+        "--check-mgn-geometry",
+        action="store_true",
+        help="inspect MGN segment crossings/overlaps and record frame-level diagnostics",
+    )
     return p
 
 
@@ -483,6 +542,9 @@ def main():
     print("보고서:", out / "report.html")
     print("요약:", out / "summary.json")
     if any(b["status"] != "ok" for b in s["models"].values()):
+        raise SystemExit(1)
+    geometry = s["models"]["MGN"].get("geometry")
+    if args.check_mgn_geometry and (geometry is None or geometry["errors"]):
         raise SystemExit(1)
 
 
