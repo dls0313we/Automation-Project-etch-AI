@@ -4,6 +4,12 @@ __pycache__/
 harness_results/
 demo_results/
 inspection_results/
+fno_adapter_results/
+mgn_adapter_results/
+review_results/
+# machine-specific input locations and real evaluation inputs
+local_paths.json
+inputs/
 .env
 .env.*
 !.env.example

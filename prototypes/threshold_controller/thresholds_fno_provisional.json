@@ -1,0 +1,53 @@
+{
+  "_notice": "FNO 전용 임시 비교용 기준입니다. 공식 합격 기준이 아니며, 숫자는 근거 없이 정한 임의 시작값입니다. status=provisional이므로 공식 판정은 HOLD입니다.",
+  "_how_to_edit": "max_metrics 숫자를 바꾸면 임시 비교표의 상한이 바뀝니다. 값을 바꾸면 version도 올리세요. 지표 계산 방식이 바뀔 때만 evaluation_contract_id를 바꿉니다.",
+  "_metric_meaning": {
+    "chamfer_um_recipe_mean": "민서 제공 Chamfer(um)의 레시피 동일 가중 평균. onestep은 레시피별 단계 평균값, rollout은 레시피별 마지막 단계값을 평균.",
+    "abs_depth_error_pct_recipe_mean": "레시피별 제공 깊이오차(%)의 절댓값 평균. 전체 단계 MAE가 아님. µm 환산하지 않음.",
+    "invalid_geometry_count": "형상 이상 건수. 현재 미측정이며 0으로 채우지 않음."
+  },
+  "policies": [
+    {
+      "model_family": "FNO",
+      "eval_mode": "onestep",
+      "version": "fno-provisional-onestep-v1",
+      "status": "provisional",
+      "evaluation_contract_id": "fno-minseo-metrics5-onestep-stepmean-v1",
+      "primary_metric": "chamfer_um_recipe_mean",
+      "max_metrics": {
+        "chamfer_um_recipe_mean": 0.05,
+        "abs_depth_error_pct_recipe_mean": 1.0,
+        "invalid_geometry_count": 0
+      },
+      "metric_units": {
+        "chamfer_um_recipe_mean": "um",
+        "abs_depth_error_pct_recipe_mean": "%",
+        "invalid_geometry_count": "count"
+      },
+      "max_relative_regression": 0.0,
+      "min_primary_improvement_relative": 0.05,
+      "denominator_floor": 1e-09
+    },
+    {
+      "model_family": "FNO",
+      "eval_mode": "rollout",
+      "version": "fno-provisional-rollout-v1",
+      "status": "provisional",
+      "evaluation_contract_id": "fno-minseo-metrics5-rollout-laststep-v1",
+      "primary_metric": "chamfer_um_recipe_mean",
+      "max_metrics": {
+        "chamfer_um_recipe_mean": 0.5,
+        "abs_depth_error_pct_recipe_mean": 5.0,
+        "invalid_geometry_count": 0
+      },
+      "metric_units": {
+        "chamfer_um_recipe_mean": "um",
+        "abs_depth_error_pct_recipe_mean": "%",
+        "invalid_geometry_count": "count"
+      },
+      "max_relative_regression": 0.0,
+      "min_primary_improvement_relative": 0.05,
+      "denominator_floor": 1e-09
+    }
+  ]
+}

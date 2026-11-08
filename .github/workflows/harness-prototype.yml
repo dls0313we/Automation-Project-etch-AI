@@ -26,7 +26,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Unit tests
-        run: python -m unittest -v test_controller.py test_inspect_results.py test_harness.py
+        run: python -m unittest -v test_controller.py test_inspect_results.py test_harness.py test_fno_adapter.py test_mgn_adapter.py test_run_review.py
       - name: Run five synthetic scenarios
         run: python harness.py --demo
       - name: Run original decision scenarios

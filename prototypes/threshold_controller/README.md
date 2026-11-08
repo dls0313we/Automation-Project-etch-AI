@@ -16,7 +16,7 @@ Python 3.11 이상을 준비한다. 이 폴더의 실행에는 추가 패키지�
 
 ```text
 cd prototypes/threshold_controller
-python -m unittest -v test_controller.py test_inspect_results.py test_harness.py
+python -m unittest -v test_controller.py test_inspect_results.py test_harness.py test_fno_adapter.py test_mgn_adapter.py test_run_review.py
 python harness.py --demo
 ```
 
@@ -35,7 +35,7 @@ APPROVE_CANDIDATE를 만든다. 결과는 `harness_results/<실행시각>/`에 �
 | `thresholds_demo_relaxed.json` | MGN rollout 상한 완화 및 기준 버전 기록 시연 |
 | `harness_inputs/evaluations/` | 실제 측정값이 아닌 가상 평가 결과 |
 | `harness_inputs/scenarios.json` | 기본 시연 5개 |
-| `test_*.py` | 기존 판정 15개 + CSV 점검 11개 + 하네스 14개 검사 |
+| `test_*.py` | 판정 15 + CSV 점검 11 + 하네스 14 + FNO 연결 21 + MGN 연결 17 + 통합 12 = 90개 검사 |
 | `inspect_results.py` | 기존 6epoch MGN 평가 CSV의 데이터/집계 점검 |
 | `examples/`, `run_demo.py` | 기존 판정기 사례 시연 |
 
@@ -92,6 +92,47 @@ python inspect_results.py --input /path/to/mgn_eval_results
 `run_demo.py --case real`은 과거 6epoch 자료의 음수 에너지 5건을 요약한 고정 사례다.
 현재 원본 CSV를 직접 읽는 명령은 `inspect_results.py`다.
 기존 CSV와 특정 체크포인트의 대응 관계나 새 모델 성능을 독립적으로 입증하지 않는다.
+
+## 실제 FNO·MGN 평가 점수 연결 (2026-11-09)
+
+[확인] 평가 담당자가 계산해 제공한 점수를 **새로 계산하지 않고** 읽어 하네스 입력으로 바꾸고,
+4개 조합(FNO/MGN × onestep/rollout)의 현재 상태를 보고서로 만든다.
+실행 증거는 [검증 기록](../../reports/evidence/W6-02_fno_mgn_review_20261109.md)에 있다.
+원본 평가 자료와 예측 배열은 이 저장소에 포함하지 않는다.
+
+```text
+python fno_adapter.py      # FNO 300런(main_s1) validation 점수
+python mgn_adapter.py      # MGN mgn_main_s1_nov9 점수 (validation 판정, test 참고 기록)
+python run_review.py       # 두 연결기를 함께 실행 → review_results/<실행시각>/report.html, summary.json
+```
+
+입력 위치는 이 폴더의 `local_paths.json`(Git 제외)에 적는다. 없으면 `inputs/` 아래 같은 이름을 찾는다.
+
+```json
+{"fno_metrics": "<경로>/metrics5_val.csv", "fno_samples": "<경로>/samples_main_s1",
+ "mgn_input": "<경로>/mgn_main_s1_nov9"}
+```
+
+| 파일 | 역할 |
+|---|---|
+| `fno_adapter.py` | FNO 평가표에서 300런(main_s1)만 선택, onestep=단계 평균·rollout=마지막 단계를 샘플로 재확인 |
+| `mgn_adapter.py` | MGN validation/test 분리, onestep=단계별 Chamfer 평균, rollout=마지막 단계 |
+| `run_review.py` | 두 연결기를 그대로 호출해 `report.html`(정적 파일), `summary.json` 저장 |
+| `thresholds_fno_provisional.json`, `thresholds_mgn_provisional.json` | 사람이 수정하는 **임시 비교용** 상한 |
+
+- [확인] FNO와 MGN의 Chamfer 계산 방식이 달라 모델별로 별도 `evaluation_contract_id`를 쓴다.
+  두 모델의 점수로 우열이나 순위를 매기지 않으며 보고서 순서는 FNO → MGN 고정이다.
+- [확인] 깊이오차(%)는 부호를 보존하고 크기 비교에는 절댓값을 쓴다. %를 µm로 환산하지 않는다.
+- [확인] 제공되지 않은 지표(MGN의 깊이 오차·IoU, 두 모델의 형상 이상 건수)는 미측정으로 두며 0으로 채우지 않는다.
+- [확인] MGN 제공 설명의 "교차 있는 레시피 남아 있음, Chamfer만으로 합격 판단 금지"를 보고서 상단에 표시한다.
+- [확인] MGN test 점수는 참고 기록만 하며 임시 기준 비교·임계치 조정·판정에 쓰지 않는다.
+- [확인] 임시 기준은 `status: provisional`이라 최종 판정은 `HOLD`다. 기준을 승인해도
+  `reference_verified=false`와 형상 이상 건수 미측정 때문에 보류가 남으며 결과에 함께 기록한다.
+- [제안] 임시 상한 숫자는 근거 없는 시작값이다. 팀 합의 후 새 파일로 확정한다.
+- [미확인] MGN validation은 rollout 간격 선택에 쓰여 독립 평가가 아니다. 자기교차 건수,
+  FNO CD 높이 기준, 정답 자료 대조는 확인하지 않았다.
+- 입력이 없거나 한쪽 연결기가 실패하면 해당 조합을 실패와 이유로 표시하고 종료 코드 1을 돌려준다.
+  과거 결과를 최신 결과처럼 보여주지 않는다.
 
 ## 기존 파이프라인과 관계
 
