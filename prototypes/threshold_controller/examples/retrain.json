@@ -1,0 +1,65 @@
+{
+  "id": "retrain",
+  "label": "2. 기준 초과: 재학습 요청",
+  "origin": "가상 입력 시연",
+  "current": {
+    "model_id": "demo-old",
+    "evaluation_dataset_id": "synthetic-validation-001",
+    "evaluation_contract_id": "demo-metric-v1",
+    "split": "validation",
+    "unit": "um",
+    "recipe_count": 10,
+    "data_origin": "synthetic_demo",
+    "training_data_ready": true,
+    "data_check": {
+      "passed": true,
+      "invalid_recipe_count": 0,
+      "reference_verified": true
+    },
+    "metrics": {
+      "mean_chamfer_um": 0.3,
+      "depth_mae_um": 0.2,
+      "invalid_geometry_count": 0
+    }
+  },
+  "candidate": null,
+  "policy": {
+    "version": "synthetic-demo-v1",
+    "status": "demo",
+    "evaluation_contract_id": "demo-metric-v1",
+    "primary_metric": "mean_chamfer_um",
+    "max_metrics": {
+      "mean_chamfer_um": 0.2,
+      "depth_mae_um": 0.5,
+      "invalid_geometry_count": 0
+    },
+    "max_relative_regression": 0.0,
+    "min_primary_improvement_relative": 0.05,
+    "denominator_floor": 1e-09
+  },
+  "expected": "RETRAIN_REQUEST",
+  "headline": "재학습 요청",
+  "reason": "형상 오차가 시연 기준을 넘었고, 승인된 학습 데이터가 준비됐습니다.",
+  "decision": {
+    "action": "RETRAIN_REQUEST",
+    "reasons": [
+      "Quality failed and approved training data is available; request the training runner."
+    ],
+    "policy_version": "synthetic-demo-v1",
+    "policy_status": "demo",
+    "current_model": "demo-old",
+    "candidate_model": null,
+    "decided_at_utc": "2026-11-08T08:04:05.948820+00:00",
+    "evidence": {
+      "failed_checks": [
+        {
+          "metric": "mean_chamfer_um",
+          "observed": 0.3,
+          "maximum": 0.2
+        }
+      ]
+    },
+    "training_started": false,
+    "active_model_changed": false
+  }
+}

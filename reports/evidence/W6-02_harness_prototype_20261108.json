@@ -1,0 +1,82 @@
+{
+  "verified_at_utc": "2026-11-08T13:42:11.467360+00:00",
+  "python": "3.12.14",
+  "platform": "Windows",
+  "scope": "Local standalone prototype only; no real training, model replacement or evaluator connection",
+  "commands": [
+    {
+      "command": "python -m unittest -v test_controller.py test_inspect_results.py test_harness.py",
+      "exit_code": 0,
+      "result": "40 tests passed"
+    },
+    {
+      "command": "python harness.py --demo",
+      "exit_code": 0,
+      "actions": [
+        "KEEP_CURRENT",
+        "RETRAIN_REQUEST",
+        "DATA_REVIEW",
+        "HOLD",
+        "APPROVE_CANDIDATE"
+      ]
+    },
+    {
+      "command": "python run_demo.py",
+      "exit_code": 0,
+      "actions": [
+        "KEEP_CURRENT",
+        "RETRAIN_REQUEST",
+        "DATA_REVIEW",
+        "APPROVE_CANDIDATE",
+        "DATA_REVIEW"
+      ]
+    },
+    {
+      "command": "python harness.py --eval harness_inputs/evaluations/mgn_rollout_v1_over_limit.json",
+      "exit_code": 0,
+      "actions": [
+        "RETRAIN_REQUEST"
+      ]
+    },
+    {
+      "command": "python harness.py --eval harness_inputs/evaluations/mgn_rollout_v1_over_limit.json --thresholds thresholds_demo_relaxed.json",
+      "exit_code": 0,
+      "actions": [
+        "KEEP_CURRENT"
+      ]
+    }
+  ],
+  "lint": "ruff 0.17.3 check . passed",
+  "existing_forbidden_expression_check": "passed",
+  "portable_file_scan": "passed; no recognized secret patterns or local absolute paths",
+  "hosted_ci": "not checked yet",
+  "files_sha256": {
+    ".gitattributes": "a79691a93b46e49ce460c26ef22afcc03d6eca1e63bf2edbc20e96159510f6c9",
+    ".gitignore": "5545ff76469a142f56ac066eb37f2ebf27010702e5551400e757f47143454240",
+    "CLAUDE.md": "bc8938206dab13ba4f483c656e99c615f51019c7dfd5e69c10771f2f3c8eb1e6",
+    "controller.py": "578e94d4c4ce44c30474f76e0c50725081e4e8ed8d1ea61781945da3a1d8e2ae",
+    "examples/candidate.json": "cdce96d5b0c37f508d306c96fcdfc3cfb931de72b3a600c1a555d6f584497880",
+    "examples/data.json": "56b4037a039cfe0eb7abf8a0656a5f11085f54a5c9361bd4a0f46bedc9ff9df4",
+    "examples/keep.json": "8889b85bae0383230d853372028e6dc9868f724becc9663c4ede1feb371b629f",
+    "examples/real.json": "c7d52d6f2a1e3c91c90db8ce38b334e2ce6849c141a9c359aa28f2b6f2c7cd30",
+    "examples/retrain.json": "29d2bdc27374b8a61b39c9cbb47e32d0ced42a40b045b1619c05487f0477d657",
+    "harness.py": "13120742d9d9cf232efca834260a1f1fc674cb6ad349ff6a136d996f8e49aadc",
+    "harness_inputs/evaluations/fno_onestep_v1_bad_data.json": "619eabfcd1a80e9ecb0ada88ab20d00d68886f76c8ee9862f367bb411c5bf912",
+    "harness_inputs/evaluations/fno_rollout_v1_missing_metric.json": "bcdf2b7dbd46f1b132d42cb596c30047a04e05d5f7f5e11b68bdf29f0325bfbe",
+    "harness_inputs/evaluations/mgn_onestep_v1_ok.json": "dc7c872b9bee3336b4d8cb2aaeca1b8f369a63628057b605355ab13653ebb586",
+    "harness_inputs/evaluations/mgn_onestep_v2_candidate.json": "41c997983faa695f3b030656f5b5a1309d6f7b05d684beb4e28d643b5206c89e",
+    "harness_inputs/evaluations/mgn_rollout_v1_over_limit.json": "3a366c84579e7b7bf313018e60fe3ff9ff5f7235ada61b18efaab30a9b887905",
+    "harness_inputs/scenarios.json": "a4faafcdfab77b41a68200b612cdcd6c3b7c28815f5988d2af00c12922809a08",
+    "inspect_results.py": "c3b7814d5aae07b57c2a872b897d85d5228e35c195cb16d74da576ce2bb2369c",
+    "README.md": "b5ca228b9bf6b9bfd6d062b20755c781075e5568f349be99cce9322d676e89eb",
+    "run_demo.py": "6f05d229feb80407bf3e77a8f306cf5d5f5a5fa23139573b3ace39f160e2e33b",
+    "SOURCE_MANIFEST.json": "8589a8feb000ce588f5364ee6e70ee2ad1d96fbb35eb183a2b7d46161b3cd278",
+    "test_controller.py": "6441819978b1c0f4c716c58b4062075b198c998a659e33421e065675d3176d74",
+    "test_harness.py": "6efa27550379ed27fc51af09a7358972cb6f1032c53ea04b2731911f1a7853c2",
+    "test_inspect_results.py": "4bd8a651c880a88373110c73e8ba7cd67770e26d68c94d0292fe75a939a97d88",
+    "thresholds_demo.json": "2828b2e30c55ae9952343101a6d88ade5ef75c92c58edd623e14c7571dfacb79",
+    "thresholds_demo_relaxed.json": "4a93bf18a894097667e8041e9dc12183e1acea420e4ed0b27ba75aead790c77f",
+    "임시기준_및_연결방법.md": "26f4ca40c6543bed3ae8d1c52efb4929e84704973e4b7e27b71cad33a7a87ede"
+  },
+  "line_endings": "Portable files normalized to LF; local .gitattributes preserves LF across clones"
+}

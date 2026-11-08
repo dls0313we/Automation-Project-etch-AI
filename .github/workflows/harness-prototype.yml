@@ -1,0 +1,33 @@
+name: harness-prototype
+
+on:
+  push:
+    paths:
+      - 'prototypes/threshold_controller/**'
+      - '.github/workflows/harness-prototype.yml'
+  pull_request:
+    paths:
+      - 'prototypes/threshold_controller/**'
+      - '.github/workflows/harness-prototype.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stdlib-demo:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: prototypes/threshold_controller
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Unit tests
+        run: python -m unittest -v test_controller.py test_inspect_results.py test_harness.py
+      - name: Run five synthetic scenarios
+        run: python harness.py --demo
+      - name: Run original decision scenarios
+        run: python run_demo.py

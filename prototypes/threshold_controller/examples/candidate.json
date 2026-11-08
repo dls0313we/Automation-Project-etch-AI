@@ -1,0 +1,79 @@
+{
+  "id": "candidate",
+  "label": "4. 새 후보 개선: 교체 후보 승인",
+  "origin": "가상 입력 시연",
+  "current": {
+    "model_id": "demo-old",
+    "evaluation_dataset_id": "synthetic-validation-001",
+    "evaluation_contract_id": "demo-metric-v1",
+    "split": "validation",
+    "unit": "um",
+    "recipe_count": 10,
+    "data_origin": "synthetic_demo",
+    "training_data_ready": false,
+    "data_check": {
+      "passed": true,
+      "invalid_recipe_count": 0,
+      "reference_verified": true
+    },
+    "metrics": {
+      "mean_chamfer_um": 0.1,
+      "depth_mae_um": 0.2,
+      "invalid_geometry_count": 0
+    }
+  },
+  "candidate": {
+    "model_id": "demo-new",
+    "evaluation_dataset_id": "synthetic-validation-001",
+    "evaluation_contract_id": "demo-metric-v1",
+    "split": "validation",
+    "unit": "um",
+    "recipe_count": 10,
+    "data_origin": "synthetic_demo",
+    "training_data_ready": false,
+    "data_check": {
+      "passed": true,
+      "invalid_recipe_count": 0,
+      "reference_verified": true
+    },
+    "metrics": {
+      "mean_chamfer_um": 0.08,
+      "depth_mae_um": 0.18,
+      "invalid_geometry_count": 0
+    }
+  },
+  "policy": {
+    "version": "synthetic-demo-v1",
+    "status": "demo",
+    "evaluation_contract_id": "demo-metric-v1",
+    "primary_metric": "mean_chamfer_um",
+    "max_metrics": {
+      "mean_chamfer_um": 0.2,
+      "depth_mae_um": 0.5,
+      "invalid_geometry_count": 0
+    },
+    "max_relative_regression": 0.0,
+    "min_primary_improvement_relative": 0.05,
+    "denominator_floor": 1e-09
+  },
+  "expected": "APPROVE_CANDIDATE",
+  "headline": "교체 후보 승인",
+  "reason": "동일 검증셋에서 후보가 허용 오차를 만족하고 주 오차를 20% 줄였습니다.",
+  "decision": {
+    "action": "APPROVE_CANDIDATE",
+    "reasons": [
+      "Candidate passes absolute limits, non-regression and primary improvement requirements.",
+      "Recommendation only. Loading, smoke tests, publication and rollback are separate steps."
+    ],
+    "policy_version": "synthetic-demo-v1",
+    "policy_status": "demo",
+    "current_model": "demo-old",
+    "candidate_model": "demo-new",
+    "decided_at_utc": "2026-11-08T08:04:05.951330+00:00",
+    "evidence": {
+      "primary_relative_improvement": 0.20000000000000004
+    },
+    "training_started": false,
+    "active_model_changed": false
+  }
+}

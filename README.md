@@ -9,3 +9,10 @@
 ## 라이선스
 
 저장소 코드는 Apache-2.0 (`LICENSE`). ViennaPS(GPL-3.0)를 포함하는 시뮬레이션 이미지는 별도 조건이 있다 — `NOTICE` 참조.
+
+## 임계치 판정기 선행 시연
+
+[확인] [독립 실행 안내](prototypes/threshold_controller/README.md)에 평가 점수 입력,
+모델/평가 방식별 임계치 비교, 판정 및 이유 저장 예제를 추가했다.
+[제안] 입력과 임계치는 가상 값이다. 실제 평가기·재학습·모델 교체 연결은 미확인이다.
+[로컬 검증 기록](reports/evidence/W6-02_harness_prototype_20261108.md)을 참조한다.

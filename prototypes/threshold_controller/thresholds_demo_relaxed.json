@@ -1,0 +1,90 @@
+{
+  "_notice": "시연용 가상 임계치입니다. 실제 MGN/FNO 합격 기준이 아닙니다. status=demo 기준은 data_origin=synthetic_demo 자료만 판정합니다.",
+  "_how_to_edit": "max_metrics 숫자를 바꾸면 해당 모델·평가 방식의 허용 상한이 바뀝니다. 공식 기준은 별도 파일로 만들고 status를 approved로 바꿉니다.",
+  "policies": [
+    {
+      "model_family": "MGN",
+      "eval_mode": "onestep",
+      "version": "demo-MGN-onestep-v1",
+      "status": "demo",
+      "evaluation_contract_id": "demo-MGN-onestep-v1",
+      "primary_metric": "mean_chamfer_um",
+      "max_metrics": {
+        "mean_chamfer_um": 0.2,
+        "depth_mae_um": 0.5,
+        "invalid_geometry_count": 0
+      },
+      "metric_units": {
+        "mean_chamfer_um": "um",
+        "depth_mae_um": "um",
+        "invalid_geometry_count": "count"
+      },
+      "max_relative_regression": 0.0,
+      "min_primary_improvement_relative": 0.05,
+      "denominator_floor": 1e-09
+    },
+    {
+      "model_family": "MGN",
+      "eval_mode": "rollout",
+      "version": "demo-MGN-rollout-v2-relaxed",
+      "status": "demo",
+      "evaluation_contract_id": "demo-MGN-rollout-v1",
+      "primary_metric": "mean_chamfer_um",
+      "max_metrics": {
+        "mean_chamfer_um": 0.8,
+        "depth_mae_um": 1.0,
+        "invalid_geometry_count": 0
+      },
+      "metric_units": {
+        "mean_chamfer_um": "um",
+        "depth_mae_um": "um",
+        "invalid_geometry_count": "count"
+      },
+      "max_relative_regression": 0.0,
+      "min_primary_improvement_relative": 0.05,
+      "denominator_floor": 1e-09
+    },
+    {
+      "model_family": "FNO",
+      "eval_mode": "onestep",
+      "version": "demo-FNO-onestep-v1",
+      "status": "demo",
+      "evaluation_contract_id": "demo-FNO-onestep-v1",
+      "primary_metric": "mean_chamfer_um",
+      "max_metrics": {
+        "mean_chamfer_um": 0.25,
+        "depth_mae_um": 0.6,
+        "invalid_geometry_count": 0
+      },
+      "metric_units": {
+        "mean_chamfer_um": "um",
+        "depth_mae_um": "um",
+        "invalid_geometry_count": "count"
+      },
+      "max_relative_regression": 0.0,
+      "min_primary_improvement_relative": 0.05,
+      "denominator_floor": 1e-09
+    },
+    {
+      "model_family": "FNO",
+      "eval_mode": "rollout",
+      "version": "demo-FNO-rollout-v1",
+      "status": "demo",
+      "evaluation_contract_id": "demo-FNO-rollout-v1",
+      "primary_metric": "mean_chamfer_um",
+      "max_metrics": {
+        "mean_chamfer_um": 0.6,
+        "depth_mae_um": 1.2,
+        "invalid_geometry_count": 0
+      },
+      "metric_units": {
+        "mean_chamfer_um": "um",
+        "depth_mae_um": "um",
+        "invalid_geometry_count": "count"
+      },
+      "max_relative_regression": 0.0,
+      "min_primary_improvement_relative": 0.05,
+      "denominator_floor": 1e-09
+    }
+  ]
+}

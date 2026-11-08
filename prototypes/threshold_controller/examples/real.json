@@ -1,0 +1,54 @@
+{
+  "id": "real",
+  "label": "5. 실제 6epoch MGN 자료: 데이터 점검",
+  "origin": "기존 6epoch MGN 평가 자료의 입력 점검",
+  "current": {
+    "model_id": "MGN_6epoch_1537d9495f78",
+    "evaluation_dataset_id": "uploaded_test40_ood20",
+    "evaluation_contract_id": "original_one_step_diagnostic_only",
+    "split": "test",
+    "unit": "um",
+    "recipe_count": 60,
+    "data_origin": "measured",
+    "training_data_ready": false,
+    "data_check": {
+      "passed": false,
+      "invalid_recipe_count": 5,
+      "reference_verified": false
+    },
+    "metrics": {}
+  },
+  "candidate": null,
+  "policy": {
+    "version": "team_policy_TBD",
+    "status": "draft",
+    "evaluation_contract_id": "TBD_define_metric_units_aggregation_and_horizon",
+    "primary_metric": "mean_chamfer_um",
+    "max_metrics": {
+      "mean_chamfer_um": null,
+      "depth_mae_um": null,
+      "invalid_geometry_count": null
+    },
+    "max_relative_regression": null,
+    "min_primary_improvement_relative": null,
+    "denominator_floor": null,
+    "note": "No approved thresholds. Define validation protocol and permitted errors with the team."
+  },
+  "expected": "DATA_REVIEW",
+  "headline": "데이터 점검",
+  "reason": "업로드된 조건 CSV에서 평균 이온 에너지가 음수인 OOD 5건을 확인했습니다.",
+  "decision": {
+    "action": "DATA_REVIEW",
+    "reasons": [
+      "current: Data inspection failed; do not use model training to repair invalid inputs."
+    ],
+    "policy_version": "team_policy_TBD",
+    "policy_status": "draft",
+    "current_model": "MGN_6epoch_1537d9495f78",
+    "candidate_model": null,
+    "decided_at_utc": "2026-11-08T08:04:05.952335+00:00",
+    "evidence": {},
+    "training_started": false,
+    "active_model_changed": false
+  }
+}

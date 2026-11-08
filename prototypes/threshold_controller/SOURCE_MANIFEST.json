@@ -1,0 +1,28 @@
+{
+  "scope": "Portable copy of local threshold-controller prototype; no weights or datasets",
+  "source_date": "2026-11-08",
+  "source_files_sha256_before_portable_formatting": {
+    "controller.py": "336bc8f755bafd3499e43bd545d787592f5475f1ef89bb2ecb5dcf16378ded5a",
+    "examples/candidate.json": "52ae8618c177d8b38d4d4b86aa042a1ac1912bc5a699e1e6e3811d6e16d96e34",
+    "examples/data.json": "fff75e6a1bb0826b5e741756b5ef1491af0f8471e5904621757207e748c272b0",
+    "examples/keep.json": "681047e3205fdf2ecee14a8867c0beb02ba16ae9067ba697ab6a13643d61512d",
+    "examples/real.json": "b638a298e7e75298914075cd19ae394e1da996f53026ef082a19b277c0895e11",
+    "examples/retrain.json": "70f3ec1786da7898dd7a5a6612e59ec32ee8324a55dfcbe4244fb2d6ec8dfce8",
+    "harness.py": "0db57bc76a9ef21593dc04e82689ecb4d5404166990a12e5675cde9313481829",
+    "harness_inputs/evaluations/fno_onestep_v1_bad_data.json": "2e5c19ce09f5884cae1a155a70124ac7d007232baef9b97d87bff0bfcc610839",
+    "harness_inputs/evaluations/fno_rollout_v1_missing_metric.json": "a70f0d58320ab0e0e6691c849d9a083bff88cd1d056c54b3ff163af1137ee745",
+    "harness_inputs/evaluations/mgn_onestep_v1_ok.json": "2fa6d91c805539af0871c86f6707c64c7ef7c50f28383f609efe22095aa91fda",
+    "harness_inputs/evaluations/mgn_onestep_v2_candidate.json": "f1f2f9a2e5780403d811d2dee28ad9ec560d99aaf63fd2b77c68b29a5215ed86",
+    "harness_inputs/evaluations/mgn_rollout_v1_over_limit.json": "f1119c5e453a1cb5da28d257c7a3e54f1f02e2a2d0d1f0250378336da2634da1",
+    "harness_inputs/scenarios.json": "15228be4261fd2c5ac8898d18a9030a31820b9ca8a78d29c20d59f8e6a27be78",
+    "inspect_results.py": "d2acf0da48d0970942d9dc27b80e02f822ba0ded26b3a0c1a108d192a680ac5b",
+    "run_demo.py": "8598bba468382c3092cd44e4cb8990cce7ba20c3a84a8f9dfebfc39f94c658a4",
+    "test_controller.py": "eba34f184d61e9a2f5f95d21731c110e8a5e317f0f336fec25e8571467245cfb",
+    "test_harness.py": "184aeb11f86c7c56ac0dbcba1d95479aed82266b9f4cec5b1269fb603bca795a",
+    "test_inspect_results.py": "ffe669f21de0b897cd9d2a9c6e87bbbf692e8c8ee0608d3689263f8260830275",
+    "thresholds_demo.json": "417e9ed68fb4189b99b5d1db31385ecc0fdfe13b95f3517dbd149ced9e5f6eca",
+    "thresholds_demo_relaxed.json": "91023c88a9b357292d681fc19b243b490da4a3cee456cac81ffba274bedc391a",
+    "임시기준_및_연결방법.md": "26f4ca40c6543bed3ae8d1c52efb4929e84704973e4b7e27b71cad33a7a87ede"
+  },
+  "note": "Python files in this copy may be formatted for repository lint. Original local files are unchanged."
+}

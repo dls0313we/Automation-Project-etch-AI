@@ -1,0 +1,36 @@
+{
+  "_notice": "시연용 가상 사례 목록입니다.",
+  "scenarios": [
+    {
+      "id": "keep",
+      "label": "1. 정상 점수 → 현재 모델 유지",
+      "current": "harness_inputs/evaluations/mgn_onestep_v1_ok.json",
+      "expected": "KEEP_CURRENT"
+    },
+    {
+      "id": "retrain",
+      "label": "2. 기준 초과 + 학습 데이터 준비 → 재학습 요청",
+      "current": "harness_inputs/evaluations/mgn_rollout_v1_over_limit.json",
+      "expected": "RETRAIN_REQUEST"
+    },
+    {
+      "id": "data",
+      "label": "3. 데이터 문제 → 데이터 재검토",
+      "current": "harness_inputs/evaluations/fno_onestep_v1_bad_data.json",
+      "expected": "DATA_REVIEW"
+    },
+    {
+      "id": "missing",
+      "label": "4. 필수 점수 누락 → 판단 보류",
+      "current": "harness_inputs/evaluations/fno_rollout_v1_missing_metric.json",
+      "expected": "HOLD"
+    },
+    {
+      "id": "candidate",
+      "label": "5. 새 모델 개선 + 승인 조건 충족 → 교체 승인 권고",
+      "current": "harness_inputs/evaluations/mgn_onestep_v1_ok.json",
+      "candidate": "harness_inputs/evaluations/mgn_onestep_v2_candidate.json",
+      "expected": "APPROVE_CANDIDATE"
+    }
+  ]
+}

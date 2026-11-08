@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+harness_results/
+demo_results/
+inspection_results/
+.env
+.env.*
+!.env.example
+*.pt
+*.pth
+*.ckpt
+*.npz
+*.npy
+*.vtp

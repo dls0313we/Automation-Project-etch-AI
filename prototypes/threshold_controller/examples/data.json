@@ -1,0 +1,57 @@
+{
+  "id": "data",
+  "label": "3. 잘못된 입력: 데이터 점검",
+  "origin": "가상 입력 시연",
+  "current": {
+    "model_id": "demo-old",
+    "evaluation_dataset_id": "synthetic-validation-001",
+    "evaluation_contract_id": "demo-metric-v1",
+    "split": "validation",
+    "unit": "um",
+    "recipe_count": 10,
+    "data_origin": "synthetic_demo",
+    "training_data_ready": true,
+    "data_check": {
+      "passed": false,
+      "invalid_recipe_count": 5,
+      "reference_verified": true
+    },
+    "metrics": {
+      "mean_chamfer_um": 0.3,
+      "depth_mae_um": 0.2,
+      "invalid_geometry_count": 0
+    }
+  },
+  "candidate": null,
+  "policy": {
+    "version": "synthetic-demo-v1",
+    "status": "demo",
+    "evaluation_contract_id": "demo-metric-v1",
+    "primary_metric": "mean_chamfer_um",
+    "max_metrics": {
+      "mean_chamfer_um": 0.2,
+      "depth_mae_um": 0.5,
+      "invalid_geometry_count": 0
+    },
+    "max_relative_regression": 0.0,
+    "min_primary_improvement_relative": 0.05,
+    "denominator_floor": 1e-09
+  },
+  "expected": "DATA_REVIEW",
+  "headline": "데이터 점검",
+  "reason": "잘못된 조건 5건을 보고해 재학습 요청보다 데이터 점검을 먼저 선택합니다.",
+  "decision": {
+    "action": "DATA_REVIEW",
+    "reasons": [
+      "current: Data inspection failed; do not use model training to repair invalid inputs."
+    ],
+    "policy_version": "synthetic-demo-v1",
+    "policy_status": "demo",
+    "current_model": "demo-old",
+    "candidate_model": null,
+    "decided_at_utc": "2026-11-08T08:04:05.949814+00:00",
+    "evidence": {},
+    "training_started": false,
+    "active_model_changed": false
+  }
+}

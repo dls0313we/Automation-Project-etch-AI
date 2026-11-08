@@ -1,0 +1,28 @@
+{
+  "_notice": "시연용 가상 FNO 평가값입니다. 실제 FNO 지표·단위는 확인되지 않았고 MGN 지표 이름을 임시로 재사용합니다.",
+  "model_family": "FNO",
+  "model_version": "fno-demo-v1",
+  "eval_mode": "onestep",
+  "evaluation_dataset_id": "synthetic-validation-001",
+  "split": "validation",
+  "evaluation_contract_id": "demo-FNO-onestep-v1",
+  "unit": "um",
+  "metric_units": {
+    "mean_chamfer_um": "um",
+    "depth_mae_um": "um",
+    "invalid_geometry_count": "count"
+  },
+  "recipe_count": 10,
+  "data_origin": "synthetic_demo",
+  "training_data_ready": false,
+  "data_check": {
+    "passed": false,
+    "invalid_recipe_count": 3,
+    "reference_verified": true
+  },
+  "metrics": {
+    "mean_chamfer_um": 0.3,
+    "depth_mae_um": 0.4,
+    "invalid_geometry_count": 0
+  }
+}
