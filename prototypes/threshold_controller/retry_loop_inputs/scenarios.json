@@ -1,0 +1,71 @@
+{
+  "_notice": "최대 4회 재시도 흐름을 검증하는 가상 자료입니다. 실제 학습·생성·모델 교체 없음.",
+  "scenarios": [
+    {
+      "id": "pass_second",
+      "label": "1차 미달, 2차 통과 후 종료",
+      "current": "../mock_loop_inputs/evaluations/current_over_limit.json",
+      "thresholds": "../mock_loop_inputs/thresholds_mock.json",
+      "plans": [
+        {"result": "candidate", "candidate": "../mock_loop_inputs/evaluations/candidate_worse.json"},
+        {"result": "candidate", "candidate": "../mock_loop_inputs/evaluations/candidate_better.json"},
+        {"result": "fail", "reason": "통과 뒤 이 계획은 실행되면 안 됨"}
+      ],
+      "expected": "RECOMMEND_REPLACEMENT"
+    },
+    {
+      "id": "pass_fourth",
+      "label": "1~3차 미달, 4차 통과 후 종료",
+      "current": "../mock_loop_inputs/evaluations/current_over_limit.json",
+      "thresholds": "../mock_loop_inputs/thresholds_mock.json",
+      "plans": [
+        {"result": "candidate", "candidate": "../mock_loop_inputs/evaluations/candidate_worse.json"},
+        {"result": "candidate", "candidate": "../mock_loop_inputs/evaluations/candidate_worse.json"},
+        {"result": "candidate", "candidate": "../mock_loop_inputs/evaluations/candidate_worse.json"},
+        {"result": "candidate", "candidate": "../mock_loop_inputs/evaluations/candidate_better.json"}
+      ],
+      "expected": "RECOMMEND_REPLACEMENT"
+    },
+    {
+      "id": "all_blocked",
+      "label": "4회 모두 미달, 기존 모델 유지",
+      "current": "../mock_loop_inputs/evaluations/current_over_limit.json",
+      "thresholds": "../mock_loop_inputs/thresholds_mock.json",
+      "plans": [
+        {"result": "candidate", "candidate": "../mock_loop_inputs/evaluations/candidate_worse.json"},
+        {"result": "candidate", "candidate": "../mock_loop_inputs/evaluations/candidate_worse.json"},
+        {"result": "candidate", "candidate": "../mock_loop_inputs/evaluations/candidate_worse.json"},
+        {"result": "candidate", "candidate": "../mock_loop_inputs/evaluations/candidate_worse.json"},
+        {"result": "fail", "reason": "5차 계획은 실행되면 안 됨"}
+      ],
+      "expected": "EXHAUSTED_KEEP_CURRENT"
+    },
+    {
+      "id": "hold_before_start",
+      "label": "임시 기준이면 시작하지 않음",
+      "current": "../mock_loop_inputs/evaluations/current_over_limit.json",
+      "thresholds": "../mock_loop_inputs/thresholds_mock_provisional.json",
+      "plans": [],
+      "expected": "NOT_STARTED_HOLD"
+    },
+    {
+      "id": "missing_score",
+      "label": "후보 점수 누락이면 재시도 없이 중단",
+      "current": "../mock_loop_inputs/evaluations/current_over_limit.json",
+      "thresholds": "../mock_loop_inputs/thresholds_mock.json",
+      "plans": [
+        {"result": "candidate", "candidate": "../mock_loop_inputs/evaluations/candidate_missing_metric.json"},
+        {"result": "candidate", "candidate": "../mock_loop_inputs/evaluations/candidate_better.json"}
+      ],
+      "expected": "STOPPED_CANDIDATE_EVALUATION"
+    },
+    {
+      "id": "runner_failure",
+      "label": "실행기 실패면 재시도 없이 중단",
+      "current": "../mock_loop_inputs/evaluations/current_over_limit.json",
+      "thresholds": "../mock_loop_inputs/thresholds_mock.json",
+      "plans": [{"result": "fail", "reason": "모의 학습 실행 실패"}],
+      "expected": "STOPPED_TRAINING_FAILED"
+    }
+  ]
+}

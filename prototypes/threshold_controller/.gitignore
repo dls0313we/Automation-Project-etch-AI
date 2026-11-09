@@ -13,6 +13,7 @@ fno_gt_overlay_results/
 fno_sdf_compare_results/
 fno_chamfer_compare_results/
 mock_loop_results/
+retry_loop_results/
 # machine-specific input locations and real evaluation inputs
 local_paths.json
 inputs/

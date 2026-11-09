@@ -1,7 +1,7 @@
 # 독립 하네스 프로토타입
 
 상위 저장소의 프로젝트 규칙을 따른다. README.md를 먼저 읽는다.
-이 폴더에서 `python -m unittest -v test_controller.py test_inspect_results.py test_harness.py test_fno_adapter.py test_mgn_adapter.py test_run_review.py test_mgn_geometry.py test_mgn_gt_overlay.py test_fno_gt_overlay.py test_mock_retrain_loop.py test_fno_sdf_compare.py test_fno_chamfer_compare.py`를 실행한다(188개).
+이 폴더에서 `python -m unittest -v test_controller.py test_inspect_results.py test_harness.py test_fno_adapter.py test_mgn_adapter.py test_run_review.py test_mgn_geometry.py test_mgn_gt_overlay.py test_fno_gt_overlay.py test_mock_retrain_loop.py test_fno_sdf_compare.py test_fno_chamfer_compare.py test_retry_retrain_loop.py`를 실행한다(206개).
 실제 점수 연결은 `python run_review.py`(입력 위치는 Git 제외 `local_paths.json`)로 실행한다.
 FNO·MGN Chamfer 정의가 달라 우열·순위를 매기지 않는다. MGN test 점수는 참고 기록만 한다.
 제공되지 않은 지표는 0으로 채우지 않는다.
@@ -21,6 +21,10 @@ FNO 평가 정의는 `FNO_평가정의_확인_20261109.md`를 읽는다. 정답 
 시연은 `python harness.py --demo`로 실행하고 예상값 대신 실제 판정과 종료 코드를 보고한다.
 가상 평가값과 임계치를 실제 모델의 검증 결과나 공식 기준으로 표현하지 않는다.
 기존 파이프라인의 스키마, 게이트, 레지스트리는 이 프로토타입과 아직 연결되지 않았다.
+최대 4회 모의 재시도는 `python retry_retrain_loop.py`로 실행한다. 성능 미달만 다음 시도로 넘기고, 통과하면 즉시
+교체 권고 후 종료한다. 점수 누락·데이터 문제·실행 실패는 즉시 중단하며 횟수 상한 4를 넘지 않는다.
+학습 설정은 ADR-0002를 참고한 시연용 제안이며 실제로 적용하지 않는다. 같은 기존 모델·평가 데이터·임계치로
+비교하고 실제 자료는 거부한다. 실제 C5 게이트·레지스트리 연결이나 C8/W6-04 전체 완료로 표현하지 않는다.
 모의 재학습 루프는 `python mock_retrain_loop.py`로 실행하며 `mock_loop_inputs/`의 가상 자료만 쓴다.
 모의 실행(mock_executed)과 실제 실행(real_executed)을 구분해 보고한다. 교체는 권고만 하고 실행하지 않는다.
 원본 평가 자료와 과거 실행 결과를 수정하지 않는다. 모델 학습과 교체를 실행하지 않는다.

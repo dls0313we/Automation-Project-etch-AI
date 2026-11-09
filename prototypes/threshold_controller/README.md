@@ -16,9 +16,10 @@ Python 3.11 이상을 준비한다. 이 폴더의 실행에는 추가 패키지�
 
 ```text
 cd prototypes/threshold_controller
-python -m unittest -v test_controller.py test_inspect_results.py test_harness.py test_fno_adapter.py test_mgn_adapter.py test_run_review.py test_mgn_geometry.py test_mgn_gt_overlay.py test_fno_gt_overlay.py test_mock_retrain_loop.py test_fno_sdf_compare.py test_fno_chamfer_compare.py
+python -m unittest -v test_controller.py test_inspect_results.py test_harness.py test_fno_adapter.py test_mgn_adapter.py test_run_review.py test_mgn_geometry.py test_mgn_gt_overlay.py test_fno_gt_overlay.py test_mock_retrain_loop.py test_fno_sdf_compare.py test_fno_chamfer_compare.py test_retry_retrain_loop.py
 python harness.py --demo
 python mock_retrain_loop.py
+python retry_retrain_loop.py
 ```
 
 가상 사례 5개는 차례대로 KEEP_CURRENT, RETRAIN_REQUEST, DATA_REVIEW, HOLD,
@@ -36,7 +37,7 @@ APPROVE_CANDIDATE를 만든다. 결과는 `harness_results/<실행시각>/`에 �
 | `thresholds_demo_relaxed.json` | MGN rollout 상한 완화 및 기준 버전 기록 시연 |
 | `harness_inputs/evaluations/` | 실제 측정값이 아닌 가상 평가 결과 |
 | `harness_inputs/scenarios.json` | 기본 시연 5개 |
-| `test_*.py` | 판정 15 + CSV 점검 11 + 하네스 14 + FNO 연결 21 + MGN 연결 17 + 통합 12 + 형상 검사 29 + MGN 정답 비교 11 + FNO 정답 비교 17 + 모의 재학습 루프 11 + FNO SDF 비교 14 + FNO Chamfer 재계산 16 = 188개 검사 |
+| `test_*.py` | 판정 15 + CSV 점검 11 + 하네스 14 + FNO 연결 21 + MGN 연결 17 + 통합 12 + 형상 검사 29 + MGN 정답 비교 11 + FNO 정답 비교 17 + 모의 재학습 루프 11 + FNO SDF 비교 14 + FNO Chamfer 재계산 16 + 최대 4회 모의 재시도 18 = 206개 검사 |
 | `mgn_geometry.py` | 선택형 MGN 선분 교차·중첩·중복 연결 검사 |
 | `mgn_gt_overlay.py` | validation 사례의 예측·정답 형상 비교 보고서 |
 | `fno_gt_overlay.py` | FNO 샘플 SDF 경계와 정답 형상 비교 보고서 |
@@ -45,6 +46,7 @@ APPROVE_CANDIDATE를 만든다. 결과는 `harness_results/<실행시각>/`에 �
 | `inspect_results.py` | 기존 6epoch MGN 평가 CSV의 데이터/집계 점검 |
 | `examples/`, `run_demo.py` | 기존 판정기 사례 시연 |
 | `mock_retrain_loop.py`, `mock_loop_inputs/` | 모의 재학습 루프와 그 전용 가상 입력·시연용 기준 |
+| `retry_retrain_loop.py`, `retry_loop_inputs/` | 성능 미달일 때만 최대 4회 설정을 바꿔 재시도하는 모의 제어기와 시연 6개 |
 
 ## 임계치 수정
 
@@ -300,6 +302,40 @@ python mock_retrain_loop.py
   실행 결과 폴더는 Git 추적에서 제외합니다.
 - 실행 증거는 [검증 기록](../../reports/evidence/W6-02_mock_retrain_loop_20261109.md)에 있습니다.
 - [제안] 모의 사례의 수치·기준은 흐름 시연용 가상 값이며 실제 MGN/FNO 성능이나 공식 기준이 아닙니다.
+
+## 최대 4회 모의 재시도 (`retry_retrain_loop.py`, 2026-11-09)
+
+```text
+python retry_retrain_loop.py
+python -m unittest -v test_retry_retrain_loop.py
+```
+
+기존 모의 루프는 후보 하나를 보고 끝납니다. 이 실행기는 **후보의 성능이 기준 미달일 때만**
+다음 설정을 시도하고, 통과하면 즉시 교체를 권고한 뒤 끝납니다. 네 번 모두 미달이면 기존 모델을 유지합니다.
+점수 누락·데이터 문제·실행 실패는 성능 미달과 구분해 즉시 중단합니다.
+임시 기준이나 정답 검증 미완료로 HOLD이면 첫 시도도 하지 않습니다.
+
+| 시도 | 학습 조건 수 계획 | 추가 생성 계획 | 에포크 계획 | 학습률 계획 |
+|---|---:|---:|---:|---:|
+| 1차 | 40 | 0 | 5 | 0.001 |
+| 2차 | 100 | 60 | 5 | 0.001 |
+| 3차 | 100 | 0 | 12 | 0.001 |
+| 4차 | 100 | 0 | 12 | 0.0005 |
+
+프로젝트 ADR-0002를 참고한 **시연용 제안값**입니다. 최적값이나 공식 설정이 아닙니다.
+학습 조건 수는 실제 사용 수가 아닌 계획이며 데이터 생성·학습·가중치 생성은 실행하지 않습니다.
+각 시도의 후보는 항상 같은 기존 모델·평가 데이터·임계치와 비교합니다.
+가상 후보 ID만 시도별로 구분하며 실제 체크포인트를 만들거나 이름을 바꾸지 않습니다.
+
+- 시연 6개: 2차 통과, 4차 통과, 4회 모두 미달, HOLD로 시작 안 함, 후보 점수 누락, 실행기 실패.
+- 입력: `retry_loop_inputs/`와 기존 `mock_loop_inputs/`의 가상 자료. 실제 FNO/MGN 결과는 사용하지 않습니다.
+- 결과: `retry_loop_results/실행시각/`의 `report.html`, `report.txt`, `summary.json`,
+  `source_files.json`, `cases/<사례>.json`. 이전 결과는 덮어쓰지 않습니다.
+- PASS/BLOCK은 기존 프로토타입 판정을 요약한 **모의 상태**입니다.
+  실제 C5 골든셋 게이트나 레지스트리 승격을 호출하지 않으므로 C8/W6-04 전체 완료를 뜻하지 않습니다.
+- 실제 학습·모델 교체·데이터 생성 플래그는 모두 False입니다.
+
+실행 증거는 [검증 기록](../../reports/evidence/W6-04_bounded_mock_retries_20261109.md)에 있습니다.
 
 ## 기존 파이프라인과 관계
 
