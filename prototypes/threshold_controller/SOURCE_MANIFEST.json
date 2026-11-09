@@ -48,7 +48,7 @@
     "mock_loop_inputs/scenarios.json": "7bbdc1f12d87ad260ac533382e4406e4b6e5ab489bcee489219aac439852903d",
     "mock_loop_inputs/thresholds_mock.json": "c14134f92cdedc78122394ee4360d12967147ee216d92361783203d75de3bb1d",
     "mock_loop_inputs/thresholds_mock_provisional.json": "51593d803a66c95be59a0854b031da7b2f07b99b151856f1694beec9b0178286",
-    "FNO_평가정의_확인_20261109.md": "31274c3794a2d3cfb15f6e8e366e4398d34067ea8c2eafec4cb0ad2255165ed1"
+    "FNO_평가정의_확인_20261109.md": "46c5784a17283f6478994f5b98b7f4b31d413f0e0aab79936df13d8eeeb554ef"
   },
   "note": "Python files in this copy may be formatted for repository lint. Original local files are unchanged. 2026-11-09: added FNO/MGN real-score adapters and run_review.py; the repository copy is ruff-formatted, local inputs are configured in local_paths.json (not committed). 2026-11-09 (2): added mgn_geometry.py (optional NPZ segment check) and mgn_gt_overlay.py (prediction vs ground-truth overlay); ground-truth data is not committed. 2026-11-09 (3): added fno_gt_overlay.py (FNO sample SDF contour vs ground truth); mgn_geometry.read_npy gained an optional allowed_ndim argument (default unchanged). 2026-11-09 (4): added mock_retrain_loop.py (virtual retraining loop reusing harness.judge; no real training or model replacement) and mock_loop_inputs/ (synthetic evaluations and demo thresholds). 2026-11-09 (5): fno_adapter.py records the provider-confirmed FNO evaluation definition (PROVIDER_DEFINITION, provider_definition.json); fno_gt_overlay.py text updated; added FNO_평가정의_확인_20261109.md. Scores, thresholds, contract ids and decisions unchanged.",
   "updated_date": "2026-11-09"
