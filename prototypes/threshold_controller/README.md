@@ -233,7 +233,7 @@ python fno_chamfer_compare.py
 입력은 `fno_sdf_compare.py`와 같습니다(`fno_samples`, `fno_gt_sdf`). 대응 검증(t000 포함 번호, 좌표, 7개 조건)도 같은 함수를 씁니다.
 제공 점수·CSV·임계치·판정은 바꾸지 않고, 결과는 `fno_chamfer_compare_results/실행시각/`에 별도 진단으로 저장합니다. IoU는 제외합니다.
 
-- 민서의 평가 코드나 재표본화 구현은 로컬 자료에 없습니다(받은 샘플·정답 폴더에는 NPZ·PNG·CSV·README.json만 있음).
+- 이 v1 방법을 정의할 당시 원본 평가 코드가 없었습니다. 이후 받은 노트북 재현은 아래 수신 기록을 참고하세요.
   근거는 샘플 README의 설명 한 줄입니다: "양쪽 윤곽선을 0.1 µm 간격으로 찍고, 각 점에서 상대 윤곽선까지 최단거리의 전체 평균".
   따라서 **민서 코드와 동일한 재현이 아닙니다**(`exact_provider_reproduction=false`).
 - 사용한 방식(비교 전에 고정, 결과에 맞춰 바꾸지 않음):
@@ -254,6 +254,19 @@ python fno_chamfer_compare.py
   `summary.json`(방식·통계·범위), `source_files.json`(원본 SHA256). 모두 일치하지 않으면 종료 코드 1입니다.
 
 실행 증거는 [검증 기록](../../reports/evidence/W6-02_fno_chamfer_comparison_20261109.md)에 있다.
+
+## 원본 노트북 수신 후 Chamfer 확인 (2026-11-09)
+
+`fno_b_colab.ipynb`의 metrics5 평가 셀(인덱스 37)을 직접 확인했습니다. 예전 셀의 합산식과 혼용하지 않습니다.
+
+- 실제 표본화는 전체 호 길이가 아닌 각 원본 선분마다 `n=ceil(L/spacing)`로 등분합니다.
+- 질의점 간격 기준은 0.1 µm, 거리 대상 경계의 표본점 간격 기준은 **0.01 µm**입니다.
+- `cKDTree`가 상대 표본점까지 거리를 구하고, 양방향 거리 배열을 합쳐 평균합니다. v1의 정확한 선분 거리와 다릅니다.
+- 검토한 원본 함수 `ev_contour_pts`, `ev_seg_dist`만 실행한 결과 **98개 전부 CSV와 수치 일치**, 최대 차이 약 4.98e-10 µm입니다. 노트북 전체나 학습·추론 셀은 실행하지 않았습니다.
+- 따라서 Chamfer 계산 코드 확인 대기는 해소됐습니다. v1 진단·기존 결과는 보존하고 제공 점수는 수정하지 않습니다.
+- 원본 노트북과 검증용 NumPy/SciPy/scikit-image는 기본 하네스 의존성에 추가하지 않았습니다. 개인 경로는 `local_paths.json`의 `fno_eval_notebook`에만 있습니다.
+
+실행 증거는 [검증 기록](../../reports/evidence/W6-02_fno_provider_notebook_20261109.md)에 있습니다. IoU, 전체 40개 validation 예측 및 물리 참값은 검증하지 않았습니다. 임시 기준·공식 HOLD·`reference_verified=false`와 실제 학습·교체 미실행은 유지합니다.
 
 ## 모의 재학습 루프 (`mock_retrain_loop.py`, 2026-11-09)
 

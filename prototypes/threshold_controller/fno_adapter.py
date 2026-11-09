@@ -102,13 +102,30 @@ AGGREGATION = {
     ),
 }
 CHAMFER_DEFINITION = (
-    "Both contours sampled every 0.1 um; mean over all points of the shortest distance to the "
-    "other contour (from samples_main_s1/README.json). Differs from the local provisional "
-    "definition (sum of the two one-way means), so a separate contract id is used."
+    "Provider notebook fno_b_colab.ipynb, cell index 37: find_contours(phi, 0); "
+    "subdivide each extracted segment into ceil(length/spacing) equal parts. "
+    "Query points use spacing 0.1 um; target points use spacing 0.01 um. "
+    "cKDTree nearest point distances in both directions are concatenated and averaged. "
+    "This differs from exact point-to-segment distance and from a sum of directional means."
 )
 PROVIDER_DEFINITION = {
     "source": "Minseo reply relayed by the user on 2026-11-09",
-    "status": "provider_confirmed; not independently reproduced",
+    "status": "provider_confirmed; sample Chamfer notebook replay documented separately",
+    "notebook": {
+        "filename": "fno_b_colab.ipynb",
+        "sha256": "6046f862c4402a10d0f01f630978fda38a32e72c1e643fbf6a110e9a3d48b3c6",
+        "evaluation_cell_index_zero_based": 37,
+        "scope": "metrics5 evaluation cell; older cells use different metric definitions",
+    },
+    "chamfer": {
+        "boundary": "skimage.measure.find_contours(phi, 0.0)",
+        "query_spacing_um": 0.1,
+        "target_spacing_um": 0.01,
+        "sampling": "each original contour segment separately; n=max(ceil(L/spacing),1); "
+        "samples at i/n, i=0..n-1, plus the final contour endpoint",
+        "distance": "cKDTree nearest target point, not exact distance to a segment",
+        "mean": "pooled mean of both directional arrays, weighted by their point counts",
+    },
     "ground_truth_boundary": {
         "representation": "zero contour of the ground-truth SDF, not raw VTP segments",
         "grid_yx": [128, 256],
@@ -128,6 +145,8 @@ PROVIDER_DEFINITION = {
         "height_basis": "same y=-fraction*d for prediction and truth; d is ground-truth depth",
         "width": "length of the phi>0 interval containing x=0 at that height",
         "endpoints": "linearly interpolated phi=0 positions",
+        "notebook_center_selection": "nearest x-grid node to zero (argmin(abs(x))); "
+        "the separate diagnostic interpolates at x=0",
         "center_in_solid": "prediction width=0; error=-100% if truth width is positive",
         "error_pct": "100*(prediction_width-truth_width)/truth_width",
         "zero_truth_width": "undefined by this formula; do not replace missing values with zero",

@@ -3,7 +3,8 @@
 Recomputes Chamfer between the reference SDF and the predicted SDF (phi=0 contours) for the
 sample recipes and compares it with the provided metrics_by_step.csv. Separate diagnostic:
 it does not modify sources, scores, thresholds or harness decisions, and it is NOT a
-reproduction of the provider's code (that code was not available). IoU is out of scope.
+reproduction of the provider's code (not available when this v1 method was defined).
+The subsequently received notebook replay is recorded separately. IoU is out of scope.
 
   python fno_chamfer_compare.py
   python fno_chamfer_compare.py --samples <samples_main_s1> --truth <sdf folder>
@@ -290,8 +291,10 @@ def render_report(s, rows):
         "<h1>FNO · Chamfer 독립 재계산과 제공 점수 비교</h1>"
         f"<p>샘플 {s['sample_recipe_count']}개 조건 · {s['frames_checked']}개 프레임 · "
         f"상태 {e(s['status'])} · {e(json.dumps(s['comparison_counts'], ensure_ascii=False))}</p>"
-        '<div class="banner">별도 진단입니다. 제공자 코드가 없어 설명만 보고 구현했으며 '
-        "민서 코드와 동일한 재현이 아닙니다. 제공 점수·임계치·판정(HOLD)은 바꾸지 않습니다. "
+        '<div class="banner">v1은 원본 코드 수신 전에 설명만 보고 정의한 별도 진단입니다. '
+        "이후 받은 노트북의 실제 계산 재현은 별도 기록을 참고하세요. "
+        "이 v1 계산을 민서 코드와 동일한 재현으로 해석하지 않습니다. "
+        "제공 점수·임계치·판정(HOLD)은 바꾸지 않습니다. "
         "IoU 제외. reference_verified=False, 실제 학습·교체 없음.</div>"
         f"<p>제공 설명: {e(PROVIDED_TEXT)}</p><h2>사용한 계산 방식 (비교 전에 고정)</h2>"
         f"<ul>{method}</ul>"
@@ -330,6 +333,8 @@ def run(samples, truth_folder, output_root):
         provided_definition_text=PROVIDED_TEXT,
         provider_definition=PROVIDER_DEFINITION,
         provider_code_available=False,
+        provider_code_status_scope="Availability at the time this frozen v1 method was defined; "
+        "subsequent notebook replay is documented separately.",
         exact_provider_reproduction=False,
         method=METHOD,
         spacing_um=SPACING_UM,

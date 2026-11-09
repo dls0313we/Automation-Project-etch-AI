@@ -8,7 +8,7 @@
     "examples/keep.json": "681047e3205fdf2ecee14a8867c0beb02ba16ae9067ba697ab6a13643d61512d",
     "examples/real.json": "b638a298e7e75298914075cd19ae394e1da996f53026ef082a19b277c0895e11",
     "examples/retrain.json": "70f3ec1786da7898dd7a5a6612e59ec32ee8324a55dfcbe4244fb2d6ec8dfce8",
-    "fno_adapter.py": "7059814eeee6a58088685e89c1c67dc31691bd6116fc768786d1d17a645f7e2f",
+    "fno_adapter.py": "0fbcaab1595f9ee359a213283e8b02f7734d5df484257fbcc37bde511f8e4ea8",
     "fno_gt_overlay.py": "34149332cda9d63d3e5297e31483ca6526e07dfb8688e5c4a6b250f37f44a047",
     "harness.py": "0db57bc76a9ef21593dc04e82689ecb4d5404166990a12e5675cde9313481829",
     "harness_inputs/evaluations/fno_onestep_v1_bad_data.json": "2e5c19ce09f5884cae1a155a70124ac7d007232baef9b97d87bff0bfcc610839",
@@ -48,12 +48,12 @@
     "mock_loop_inputs/scenarios.json": "7bbdc1f12d87ad260ac533382e4406e4b6e5ab489bcee489219aac439852903d",
     "mock_loop_inputs/thresholds_mock.json": "c14134f92cdedc78122394ee4360d12967147ee216d92361783203d75de3bb1d",
     "mock_loop_inputs/thresholds_mock_provisional.json": "51593d803a66c95be59a0854b031da7b2f07b99b151856f1694beec9b0178286",
-    "FNO_평가정의_확인_20261109.md": "d8e3993c48fc1123ab2a1d68175d2937353888db59fc82c96f97346e8ca7098b",
+    "FNO_평가정의_확인_20261109.md": "9a004666b53154845f86caf48cc5e21403a3781ee0f1f4f22a48a5d6d83b6d2e",
     "fno_sdf_compare.py": "b16173e21972c2626bea964c0a4e188d385dcbfb9b3532b90086265e1c4719eb",
     "test_fno_sdf_compare.py": "e8ccb7258b3387aa55496ed58107809a0387c5eb0b386533d199831c526b2bd6",
-    "fno_chamfer_compare.py": "9f1836da8d39972a64390a18b12c9031169aa80052b27bfe16c57b1255953ade",
+    "fno_chamfer_compare.py": "3df3ef8839bd7c71cc1dd3ce200330e9da3b3b39f21a3961e2e409c85e32bb08",
     "test_fno_chamfer_compare.py": "9aba706788b56bba97bb6ef945c8125b0dc265aa103ee3d4f8809bde4c429c42"
   },
-  "note": "Python files in this copy may be formatted for repository lint. Original local files are unchanged. 2026-11-09: added FNO/MGN real-score adapters and run_review.py; the repository copy is ruff-formatted, local inputs are configured in local_paths.json (not committed). 2026-11-09 (2): added mgn_geometry.py (optional NPZ segment check) and mgn_gt_overlay.py (prediction vs ground-truth overlay); ground-truth data is not committed. 2026-11-09 (3): added fno_gt_overlay.py (FNO sample SDF contour vs ground truth); mgn_geometry.read_npy gained an optional allowed_ndim argument (default unchanged). 2026-11-09 (4): added mock_retrain_loop.py (virtual retraining loop reusing harness.judge; no real training or model replacement) and mock_loop_inputs/ (synthetic evaluations and demo thresholds). 2026-11-09 (5): fno_adapter.py records the provider-confirmed FNO evaluation definition (PROVIDER_DEFINITION, provider_definition.json); fno_gt_overlay.py text updated; added FNO_평가정의_확인_20261109.md. Scores, thresholds, contract ids and decisions unchanged. 2026-11-09 (6): added fno_sdf_compare.py (sample depth/CD vs received reference SDF) and fno_chamfer_compare.py (independent sample Chamfer recalculation; separate diagnostic, not an exact provider reproduction); fno_adapter.py/fno_gt_overlay.py text updated. Scores, thresholds and decisions unchanged.",
+  "note": "Python files in this copy may be formatted for repository lint. Original local files are unchanged. 2026-11-09: added FNO/MGN real-score adapters and run_review.py; the repository copy is ruff-formatted, local inputs are configured in local_paths.json (not committed). 2026-11-09 (2): added mgn_geometry.py (optional NPZ segment check) and mgn_gt_overlay.py (prediction vs ground-truth overlay); ground-truth data is not committed. 2026-11-09 (3): added fno_gt_overlay.py (FNO sample SDF contour vs ground truth); mgn_geometry.read_npy gained an optional allowed_ndim argument (default unchanged). 2026-11-09 (4): added mock_retrain_loop.py (virtual retraining loop reusing harness.judge; no real training or model replacement) and mock_loop_inputs/ (synthetic evaluations and demo thresholds). 2026-11-09 (5): fno_adapter.py records the provider-confirmed FNO evaluation definition (PROVIDER_DEFINITION, provider_definition.json); fno_gt_overlay.py text updated; added FNO_평가정의_확인_20261109.md. Scores, thresholds, contract ids and decisions unchanged. 2026-11-09 (6): added fno_sdf_compare.py (sample depth/CD vs received reference SDF) and fno_chamfer_compare.py (independent sample Chamfer recalculation; separate diagnostic, not an exact provider reproduction); fno_adapter.py/fno_gt_overlay.py text updated. Scores, thresholds and decisions unchanged. 2026-11-09 (7): provider notebook fno_b_colab.ipynb cell 37 Chamfer replay recorded (98/98 sample frames match the provided CSV); fno_adapter.py definition text and fno_chamfer_compare.py v1 wording updated. The notebook, its verification environment and outputs are not included. Scores, thresholds and decisions unchanged.",
   "updated_date": "2026-11-09"
 }
