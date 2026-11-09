@@ -275,7 +275,7 @@ def render_html(summary, plots):
             f"<tr><td>깊이 오차 (%)</td><td>{fmt(c['provided_depth_error_pct'])}</td>"
             f"<td>{fmt(c['recomputed_depth_error_pct'])}</td></tr>"
             f"<tr><td>바닥 CD 오차 (%)</td><td>{fmt(c['provided_bottom_cd_error_pct'])}</td>"
-            "<td>재계산 안 함 — 정답 깊이의 90% 높이로 확인; 정답 SDF 미확보</td></tr></table>"
+            "<td>이 VTP 비교에서는 재계산 안 함 — 별도 SDF 비교 보고서 참고</td></tr></table>"
             f"<p>추출 경계 {c['contour_diagnostics']['components']}묶음 · "
             f"연결 선택이 필요한 격자 {c['contour_diagnostics']['ambiguous_cells']}개</p>"
             "<details><summary>경계 추출 진단 보기</summary>"
@@ -316,7 +316,8 @@ def render_html(summary, plots):
         "<p>CD는 정답 깊이 d의 10/50/90% 높이에서 두 형상을 함께 측정하며, "
         "x=0을 포함하는 φ&gt;0 구간의 폭입니다. "
         "음수 오차는 예측 폭이 정답보다 좁음을 뜻합니다. "
-        "정답 SDF를 확보하지 않아 여기서는 제공 CD만 표시하며 점수를 수정하지 않습니다.</p>"
+        "여기서는 제공 CD만 표시합니다. 받은 정답 SDF와의 깊이·CD 수치 비교는 "
+        "별도 fno_sdf_compare.py로 실행하며 제공 점수를 수정하지 않습니다.</p>"
         "<p>모든 샘플 단계의 진단은 per_step_diagnostics.csv에 저장합니다. "
         "아래는 각 방식의 마지막 단계입니다.</p>"
         + f'<nav class="card">{links}</nav>'

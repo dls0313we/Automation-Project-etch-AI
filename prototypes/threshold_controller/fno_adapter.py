@@ -145,10 +145,10 @@ UNMEASURED = {
     "reference_verified": "Ground-truth data was not independently verified by this adapter.",
     "prediction_arrays": ".npz/.png files are hashed only; not parsed (standard library only).",
     "ground_truth_sdf_reproduction": (
-        "Provider confirmed the SDF boundary and CD height definitions. "
-        "The evaluation ground-truth SDF has not been loaded here; "
-        "provided scores and CD have not been independently "
-        "reproduced."
+        "This score adapter does not parse the received reference SDF. "
+        "Use fno_sdf_compare.py for separate sample depth/CD checks. "
+        "Chamfer/IoU and the exact provider resampling code are not "
+        "reproduced by that diagnostic."
     ),
 }
 

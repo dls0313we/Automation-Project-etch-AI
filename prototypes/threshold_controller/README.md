@@ -16,7 +16,7 @@ Python 3.11 이상을 준비한다. 이 폴더의 실행에는 추가 패키지�
 
 ```text
 cd prototypes/threshold_controller
-python -m unittest -v test_controller.py test_inspect_results.py test_harness.py test_fno_adapter.py test_mgn_adapter.py test_run_review.py test_mgn_geometry.py test_mgn_gt_overlay.py test_fno_gt_overlay.py test_mock_retrain_loop.py
+python -m unittest -v test_controller.py test_inspect_results.py test_harness.py test_fno_adapter.py test_mgn_adapter.py test_run_review.py test_mgn_geometry.py test_mgn_gt_overlay.py test_fno_gt_overlay.py test_mock_retrain_loop.py test_fno_sdf_compare.py test_fno_chamfer_compare.py
 python harness.py --demo
 python mock_retrain_loop.py
 ```
@@ -36,10 +36,12 @@ APPROVE_CANDIDATE를 만든다. 결과는 `harness_results/<실행시각>/`에 �
 | `thresholds_demo_relaxed.json` | MGN rollout 상한 완화 및 기준 버전 기록 시연 |
 | `harness_inputs/evaluations/` | 실제 측정값이 아닌 가상 평가 결과 |
 | `harness_inputs/scenarios.json` | 기본 시연 5개 |
-| `test_*.py` | 판정 15 + CSV 점검 11 + 하네스 14 + FNO 연결 21 + MGN 연결 17 + 통합 12 + 형상 검사 29 + MGN 정답 비교 11 + FNO 정답 비교 17 + 모의 재학습 루프 11 = 158개 검사 |
+| `test_*.py` | 판정 15 + CSV 점검 11 + 하네스 14 + FNO 연결 21 + MGN 연결 17 + 통합 12 + 형상 검사 29 + MGN 정답 비교 11 + FNO 정답 비교 17 + 모의 재학습 루프 11 + FNO SDF 비교 14 + FNO Chamfer 재계산 16 = 188개 검사 |
 | `mgn_geometry.py` | 선택형 MGN 선분 교차·중첩·중복 연결 검사 |
 | `mgn_gt_overlay.py` | validation 사례의 예측·정답 형상 비교 보고서 |
 | `fno_gt_overlay.py` | FNO 샘플 SDF 경계와 정답 형상 비교 보고서 |
+| `fno_sdf_compare.py` | 받은 정답 SDF와 샘플 깊이·CD를 제공 CSV와 수치 비교 |
+| `fno_chamfer_compare.py` | 같은 샘플의 Chamfer 독립 재계산·제공 CSV 비교(별도 진단, 동일 재현 아님) |
 | `inspect_results.py` | 기존 6epoch MGN 평가 CSV의 데이터/집계 점검 |
 | `examples/`, `run_demo.py` | 기존 판정기 사례 시연 |
 | `mock_retrain_loop.py`, `mock_loop_inputs/` | 모의 재학습 루프와 그 전용 가상 입력·시연용 기준 |
@@ -184,9 +186,74 @@ python fno_gt_overlay.py
 - 경계 추출: marching squares(선형 보간, 음수=고체, 안장점은 음수 상 연결). 이 추출은 구성상
   선 교차를 만들지 않으므로 자기교차 여부나 형상 합격을 판단하지 않는다.
 - 제공된 샘플 3개 레시피만 확인하며 전체 validation 판정이 아니다. CD 측정 높이는 정답 깊이의
-  10/50/90%로 제공자가 확인했으나 정답 SDF가 없어 재계산하지 않고 제공값만 표시한다.
+  10/50/90%로 제공자가 확인했다. 이 VTP 비교에서는 재계산하지 않으며 받은 정답 SDF와의 수치 비교는
+  아래 `fno_sdf_compare.py`로 따로 한다.
 - 이 그림의 정답은 VTP이고 제공 평가의 정답은 SDF φ=0 경계다. 깊이 진단도 추출 꼭짓점의 최저점을
   사용하므로 제공자의 0.1 µm 재표본화 평가를 재현했다고 해석하지 않는다. `reference_verified`는 `false`, 형상 이상 건수는 계속 미측정이다.
+
+## 받은 FNO 정답 SDF와 깊이·CD 수치 비교 (`fno_sdf_compare.py`, 2026-11-09)
+
+```text
+python fno_sdf_compare.py
+```
+
+`local_paths.json`의 `fno_gt_sdf`를 사용합니다. 별도 경로는 `--truth <폴더>`로 지정합니다.
+압축 해제 후 `sdf/sdf/`로 중첩된 폴더도 처리합니다. 표준 라이브러리만 사용하며 원본을 수정하지 않습니다.
+
+- 받은 파일 목록은 400개(이름 기준 train 300 / validation 40 / test 40 / OOD 20), 약 708 MB입니다.
+  전체 파일의 물리 정확도를 검사한 뜻은 아닙니다.
+- 실제 비교는 예측 샘플이 있는 validation 3개 레시피, 두 방식, 98개 프레임입니다.
+- 정답 `t`는 t000 포함, 예측 `step`은 t001부터입니다. 명시된 번호로 대응하며 좌표 배열과 레시피 7개 조건이 같아야 합니다.
+- 깊이는 선형 보간한 φ=0 경계 꼭짓점의 −min(y)로 계산합니다. 제공자의 0.1 µm 재표본화 코드와 동일하다고 주장하지 않습니다.
+- CD는 정답 깊이 d의 10/50/90% 높이에서 두 SDF를 측정합니다. y 방향 선형 보간 후 x=0을 포함하는 φ>0 구간의 양끝 φ=0을 선형 보간합니다.
+- 예측 중심이 고체면 폭 0, 정답 폭이 양수일 때 −100%입니다. 정답 폭 0이나 격자 밖이면 미측정으로 남깁니다.
+- 깊이 1e-6 µm, 오차율 1e-4 퍼센트포인트는 **수치 재현 비교용 허용차**입니다. 모델 합격 기준·재학습 임계치가 아닙니다.
+- 2026-11-09 실제 실행: 576개 숫자 일치, 빈칸 12개는 양쪽 미측정. 최대 차이는 깊이 약 1.12e-8 µm, 오차율 약 1.02e-6 퍼센트포인트입니다.
+- Chamfer·IoU 및 전체 40개 validation 예측은 재계산하지 않았습니다. `reference_verified=false`와 기존 HOLD를 유지합니다.
+
+결과는 `fno_sdf_compare_results/실행시각/`에 저장합니다.
+`report.html`은 같은 SDF 표현의 정답·예측 비교 그림과 마지막 단계 수치,
+`comparisons.csv`는 모든 단계의 제공값·재계산·차이,
+`summary.json`은 대응 근거·일치 현황·누락·범위,
+`per_step_diagnostics.json`은 CD 높이·폭·미측정 이유,
+`source_files.json`은 읽은 원본의 SHA256입니다. 기존 결과는 덮어쓰지 않습니다.
+
+추가 패키지 없이 실행합니다. 알고리즘 해석은
+[scikit-image의 경계 추출 설명](https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.find_contours)을 참고했고,
+scikit-image를 실행 의존성으로 추가하지 않았습니다. NumPy는 별도 검증 도구에서만 사용했습니다.
+
+실행 증거는 [검증 기록](../../reports/evidence/W6-02_fno_sdf_comparison_20261109.md)에 있다.
+
+## 같은 샘플의 Chamfer 독립 재계산 (`fno_chamfer_compare.py`, 2026-11-09)
+
+```text
+python fno_chamfer_compare.py
+```
+
+입력은 `fno_sdf_compare.py`와 같습니다(`fno_samples`, `fno_gt_sdf`). 대응 검증(t000 포함 번호, 좌표, 7개 조건)도 같은 함수를 씁니다.
+제공 점수·CSV·임계치·판정은 바꾸지 않고, 결과는 `fno_chamfer_compare_results/실행시각/`에 별도 진단으로 저장합니다. IoU는 제외합니다.
+
+- 민서의 평가 코드나 재표본화 구현은 로컬 자료에 없습니다(받은 샘플·정답 폴더에는 NPZ·PNG·CSV·README.json만 있음).
+  근거는 샘플 README의 설명 한 줄입니다: "양쪽 윤곽선을 0.1 µm 간격으로 찍고, 각 점에서 상대 윤곽선까지 최단거리의 전체 평균".
+  따라서 **민서 코드와 동일한 재현이 아닙니다**(`exact_provider_reproduction=false`).
+- 사용한 방식(비교 전에 고정, 결과에 맞춰 바꾸지 않음):
+  - 경계: 정답·예측 SDF의 φ=0, 기존 `marching_squares`(선형 보간, 안장점은 고체 연결). skimage 미사용.
+  - 재표본화: 선분을 연결한 폴리라인마다 호 길이 0, 0.1, 0.2 … µm 위치 + 남은 길이가 있으면 끝점.
+  - 거리: 각 점에서 상대 **폴리라인(선분)** 까지의 최단 유클리드 거리(상대 표본점까지가 아님).
+  - 평균: 두 윤곽선의 모든 점을 합친 평균 (Σd(정답→예측)+Σd(예측→정답))/(N정답+N예측).
+- 참고용 해석 3가지도 함께 기록합니다(일치 여부에 쓰지 않음): 두 방향 평균의 평균, 표본점 대 표본점,
+  팀 `src/etchpipe/eval/metrics.py`의 두 방향 평균의 합.
+- 수치 일치 허용차 1e-6 µm는 계산 재현 비교용이며 모델 기준이 아닙니다.
+- 2026-11-09 실제 실행: 98개 프레임 모두 비교, **98개 모두 허용차 밖(불일치)**. |차이| 중앙값 0.0011 µm,
+  최대 0.0232 µm(r0307 rollout t008: 제공 0.4089, 재계산 0.3856), 상대 차이 중앙값 7.3%, 최대 39.8%.
+  one-step 49개는 모두 재계산이 작고(약 0.001 µm 일정한 차이), rollout은 위아래가 섞입니다.
+  참고 해석은 모두 더 멀었습니다(표본점 대 표본점 중앙값 40.6%, 팀 합산식 181%).
+- NumPy로 따로 작성한 재표본화·거리·평균 계산과 이 결과의 차이는 최대 4.4e-16 µm입니다(경계 추출만 공유).
+  차이는 구현 오류보다 계산 방식 차이로 보이나 원인은 확인하지 않았습니다.
+- 결과 파일: `report.html`(방식·요약·프레임별 표), `comparisons.csv`(프레임별 제공값·재계산·차이·점 개수·참고 해석),
+  `summary.json`(방식·통계·범위), `source_files.json`(원본 SHA256). 모두 일치하지 않으면 종료 코드 1입니다.
+
+실행 증거는 [검증 기록](../../reports/evidence/W6-02_fno_chamfer_comparison_20261109.md)에 있다.
 
 ## 모의 재학습 루프 (`mock_retrain_loop.py`, 2026-11-09)
 
