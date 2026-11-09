@@ -17,7 +17,7 @@ import zipfile
 from datetime import datetime
 from pathlib import Path
 
-from fno_adapter import local_input, sha256, write_json
+from fno_adapter import PROVIDER_DEFINITION, local_input, sha256, write_json
 from mgn_geometry import MAX_ARCHIVE_BYTES, MAX_MEMBER_BYTES, read_npy
 from mgn_gt_overlay import CSS, GroundTruth
 
@@ -275,7 +275,7 @@ def render_html(summary, plots):
             f"<tr><td>깊이 오차 (%)</td><td>{fmt(c['provided_depth_error_pct'])}</td>"
             f"<td>{fmt(c['recomputed_depth_error_pct'])}</td></tr>"
             f"<tr><td>바닥 CD 오차 (%)</td><td>{fmt(c['provided_bottom_cd_error_pct'])}</td>"
-            "<td>재계산 안 함 — 측정 높이 기준 미확정</td></tr></table>"
+            "<td>재계산 안 함 — 정답 깊이의 90% 높이로 확인; 정답 SDF 미확보</td></tr></table>"
             f"<p>추출 경계 {c['contour_diagnostics']['components']}묶음 · "
             f"연결 선택이 필요한 격자 {c['contour_diagnostics']['ambiguous_cells']}개</p>"
             "<details><summary>경계 추출 진단 보기</summary>"
@@ -308,7 +308,15 @@ def render_html(summary, plots):
         "바닥 확대와 깊이 수치도 함께 확인하세요.</p>"
         "<p>원본 VTP에서 계산한 정답 깊이와 제공 평가표의 정답 깊이는 "
         "소폭 다를 수 있어 함께 표시합니다. "
-        "차이의 원인은 아직 확인하지 않았으며 제공 점수를 수정하지 않습니다.</p>"
+        "민서 답변(2026-11-09)에 따르면 평가 정답은 원본 VTP가 아닌 "
+        "128×256 정답 SDF의 φ=0 경계이며 마스크–실리콘 내부 경계를 제외합니다. "
+        "제공 깊이는 0.1 µm 재표본화 경계에서 -min(y)로 계산됩니다. "
+        "이번 진단은 VTP와 추출 꼭짓점의 최저점으로 계산하므로 동일한 평가 재현이 아닙니다. "
+        "평균 약 0.004 µm 차이라는 설명은 제공자 진술이며 독립 검증 수치가 아닙니다.</p>"
+        "<p>CD는 정답 깊이 d의 10/50/90% 높이에서 두 형상을 함께 측정하며, "
+        "x=0을 포함하는 φ&gt;0 구간의 폭입니다. "
+        "음수 오차는 예측 폭이 정답보다 좁음을 뜻합니다. "
+        "정답 SDF를 확보하지 않아 여기서는 제공 CD만 표시하며 점수를 수정하지 않습니다.</p>"
         "<p>모든 샘플 단계의 진단은 per_step_diagnostics.csv에 저장합니다. "
         "아래는 각 방식의 마지막 단계입니다.</p>"
         + f'<nav class="card">{links}</nav>'
@@ -336,6 +344,7 @@ def run(samples, gt_zip, output_root, provenance=None):
     s = dict(
         contract=CONTRACT,
         extraction=EXTRACTION,
+        provider_definition=PROVIDER_DEFINITION,
         generated_at=datetime.now().isoformat(timespec="seconds"),
         model_as_provided=readme.get("모델"),
         sample_recipe_count=len(recipes),

@@ -106,6 +106,33 @@ CHAMFER_DEFINITION = (
     "other contour (from samples_main_s1/README.json). Differs from the local provisional "
     "definition (sum of the two one-way means), so a separate contract id is used."
 )
+PROVIDER_DEFINITION = {
+    "source": "Minseo reply relayed by the user on 2026-11-09",
+    "status": "provider_confirmed; not independently reproduced",
+    "ground_truth_boundary": {
+        "representation": "zero contour of the ground-truth SDF, not raw VTP segments",
+        "grid_yx": [128, 256],
+        "x_range_um": [-15, 15],
+        "y_range_um": [-68, 21],
+        "extraction": "skimage.find_contours at phi=0; linear interpolation",
+        "surface": "air-exposed surface only; mask-silicon internal boundary excluded",
+        "reported_mean_difference_from_vtp_um": 0.004,
+        "difference_evidence": "provider statement; not independently verified here",
+    },
+    "depth": {
+        "resampling_interval_um": 0.1,
+        "formula": "-min(y) of the resampled contour; silicon top y=0",
+    },
+    "cd": {
+        "height_fractions": {"top": 0.1, "middle": 0.5, "bottom": 0.9},
+        "height_basis": "same y=-fraction*d for prediction and truth; d is ground-truth depth",
+        "width": "length of the phi>0 interval containing x=0 at that height",
+        "endpoints": "linearly interpolated phi=0 positions",
+        "center_in_solid": "prediction width=0; error=-100% if truth width is positive",
+        "error_pct": "100*(prediction_width-truth_width)/truth_width",
+        "zero_truth_width": "undefined by this formula; do not replace missing values with zero",
+    },
+}
 UNMEASURED = {
     "invalid_geometry_count": (
         "No geometry-validity/self-intersection check result was provided. Left missing, not 0."
@@ -117,8 +144,11 @@ UNMEASURED = {
     ),
     "reference_verified": "Ground-truth data was not independently verified by this adapter.",
     "prediction_arrays": ".npz/.png files are hashed only; not parsed (standard library only).",
-    "cd_height_basis": (
-        'CD 10/50/90% height basis is marked "평가 담당 확인 필요" in the sample README.'
+    "ground_truth_sdf_reproduction": (
+        "Provider confirmed the SDF boundary and CD height definitions. "
+        "The evaluation ground-truth SDF has not been loaded here; "
+        "provided scores and CD have not been independently "
+        "reproduced."
     ),
 }
 
@@ -464,6 +494,7 @@ def payload(mode, summary, data_check, dataset_id):
         evaluation_dataset_id=dataset_id,
         split="validation",
         evaluation_contract_id=AGGREGATION[mode]["contract_id"],
+        provider_definition=PROVIDER_DEFINITION,
         unit="um",
         metric_units=dict(
             chamfer_um_recipe_mean="um",
@@ -578,6 +609,18 @@ def report(sources, group, groups, inspection, summary, comparisons, decisions):
         f"집계 확인(샘플): {sum(e['match'] for e in ev)}/{len(ev)} 일치 - "
         "onestep=단계 평균, rollout=마지막 단계"
     )
+    L += [
+        "",
+        "## 제공자 확인 평가 정의 (2026-11-09 답변; 독립 재현 아님)",
+        "  정답: 128×256 SDF의 φ=0 경계, 선형 보간. 마스크–실리콘 내부 경계 제외.",
+        "  Chamfer·깊이: 경계를 0.1 µm 간격으로 재표본화. 깊이=-min(y), 실리콘 윗면 y=0.",
+        "  CD: 정답 깊이 d의 10/50/90% 높이에서 예측·정답을 함께 측정.",
+        "  폭: x=0을 포함하는 φ>0 구간 길이, 양 끝 φ=0 위치를 선형 보간.",
+        "  CD 오차(%): 100×(예측 폭−정답 폭)/정답 폭. 음수는 정답보다 좁다는 뜻.",
+        "  예측 중심이 고체이면 폭 0; 정답 폭이 양수이면 오차 −100%.",
+        "  VTP와 평균 약 0.004 µm 차이는 제공자 설명이며 여기서 검증한 수치가 아님.",
+        "  정답 SDF를 이용한 점수 재현과 합격 기준 승인은 별도이며 판정은 변경하지 않음.",
+    ]
     for mode in ("onestep", "rollout"):
         s = summary.get(mode)
         if not s:
@@ -694,6 +737,7 @@ def run(metrics, samples, thresholds, output_root, group=GROUP):
     write_json(out / "inspection.json", inspection)
     write_json(out / "score_summary.json", summary)
     write_json(out / "unmeasured.json", UNMEASURED)
+    write_json(out / "provider_definition.json", PROVIDER_DEFINITION)
     for mode, p in inputs.items():
         write_json(out / f"harness_input_{mode}.json", p)
     write_json(

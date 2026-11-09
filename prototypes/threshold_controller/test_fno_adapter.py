@@ -385,6 +385,7 @@ class FnoAdapterTests(unittest.TestCase):
                 "harness_input_rollout.json",
                 "provisional_comparison.json",
                 "official_decisions.json",
+                "provider_definition.json",
                 "report.txt",
             },
         )

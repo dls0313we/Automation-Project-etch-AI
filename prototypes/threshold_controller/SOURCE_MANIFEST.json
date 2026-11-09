@@ -8,8 +8,8 @@
     "examples/keep.json": "681047e3205fdf2ecee14a8867c0beb02ba16ae9067ba697ab6a13643d61512d",
     "examples/real.json": "b638a298e7e75298914075cd19ae394e1da996f53026ef082a19b277c0895e11",
     "examples/retrain.json": "70f3ec1786da7898dd7a5a6612e59ec32ee8324a55dfcbe4244fb2d6ec8dfce8",
-    "fno_adapter.py": "19a629d7d4755df119648fe6ba7e452fc5538738160b9c8a7426600e5e1df6aa",
-    "fno_gt_overlay.py": "bbaba8778d22ccb8e105468fe4f9f805eeee2cfdb43c2c447b00eb3208afdf19",
+    "fno_adapter.py": "278ae84f57473036acabe66ace47709ae2a0335553143c5802c8b8b56722f2fd",
+    "fno_gt_overlay.py": "65ab8fbc62bd1e59613cb81f7551beeafb4a2ea8bc2fe65df15c5753e8e8d000",
     "harness.py": "0db57bc76a9ef21593dc04e82689ecb4d5404166990a12e5675cde9313481829",
     "harness_inputs/evaluations/fno_onestep_v1_bad_data.json": "2e5c19ce09f5884cae1a155a70124ac7d007232baef9b97d87bff0bfcc610839",
     "harness_inputs/evaluations/fno_rollout_v1_missing_metric.json": "a70f0d58320ab0e0e6691c849d9a083bff88cd1d056c54b3ff163af1137ee745",
@@ -24,7 +24,7 @@
     "run_demo.py": "8598bba468382c3092cd44e4cb8990cce7ba20c3a84a8f9dfebfc39f94c658a4",
     "run_review.py": "26686a386ba757bcf38c4267f4dc92b61de7c86a4e8f2aeb44d7196df746e4bf",
     "test_controller.py": "eba34f184d61e9a2f5f95d21731c110e8a5e317f0f336fec25e8571467245cfb",
-    "test_fno_adapter.py": "ab272904359f61985d0856c41ae313df4e465dcbaaf5fd57865f793331c8850e",
+    "test_fno_adapter.py": "89997e11376a305f674ea086df82d07928f3997ba9772216fc80e362b32ff997",
     "test_fno_gt_overlay.py": "e39c50c9b7733f76664b115e279c31cb88d3186316ee9654646708a8319c1c47",
     "test_harness.py": "184aeb11f86c7c56ac0dbcba1d95479aed82266b9f4cec5b1269fb603bca795a",
     "test_inspect_results.py": "ffe669f21de0b897cd9d2a9c6e87bbbf692e8c8ee0608d3689263f8260830275",
@@ -47,8 +47,9 @@
     "mock_loop_inputs/evaluations/current_over_limit_unverified.json": "d22a3c80ec6b01213a5200d78c276a3d2238f0e149d9c7998ee9fdd48bf0db3a",
     "mock_loop_inputs/scenarios.json": "7bbdc1f12d87ad260ac533382e4406e4b6e5ab489bcee489219aac439852903d",
     "mock_loop_inputs/thresholds_mock.json": "c14134f92cdedc78122394ee4360d12967147ee216d92361783203d75de3bb1d",
-    "mock_loop_inputs/thresholds_mock_provisional.json": "51593d803a66c95be59a0854b031da7b2f07b99b151856f1694beec9b0178286"
+    "mock_loop_inputs/thresholds_mock_provisional.json": "51593d803a66c95be59a0854b031da7b2f07b99b151856f1694beec9b0178286",
+    "FNO_평가정의_확인_20261109.md": "31274c3794a2d3cfb15f6e8e366e4398d34067ea8c2eafec4cb0ad2255165ed1"
   },
-  "note": "Python files in this copy may be formatted for repository lint. Original local files are unchanged. 2026-11-09: added FNO/MGN real-score adapters and run_review.py; the repository copy is ruff-formatted, local inputs are configured in local_paths.json (not committed). 2026-11-09 (2): added mgn_geometry.py (optional NPZ segment check) and mgn_gt_overlay.py (prediction vs ground-truth overlay); ground-truth data is not committed. 2026-11-09 (3): added fno_gt_overlay.py (FNO sample SDF contour vs ground truth); mgn_geometry.read_npy gained an optional allowed_ndim argument (default unchanged). 2026-11-09 (4): added mock_retrain_loop.py (virtual retraining loop reusing harness.judge; no real training or model replacement) and mock_loop_inputs/ (synthetic evaluations and demo thresholds).",
+  "note": "Python files in this copy may be formatted for repository lint. Original local files are unchanged. 2026-11-09: added FNO/MGN real-score adapters and run_review.py; the repository copy is ruff-formatted, local inputs are configured in local_paths.json (not committed). 2026-11-09 (2): added mgn_geometry.py (optional NPZ segment check) and mgn_gt_overlay.py (prediction vs ground-truth overlay); ground-truth data is not committed. 2026-11-09 (3): added fno_gt_overlay.py (FNO sample SDF contour vs ground truth); mgn_geometry.read_npy gained an optional allowed_ndim argument (default unchanged). 2026-11-09 (4): added mock_retrain_loop.py (virtual retraining loop reusing harness.judge; no real training or model replacement) and mock_loop_inputs/ (synthetic evaluations and demo thresholds). 2026-11-09 (5): fno_adapter.py records the provider-confirmed FNO evaluation definition (PROVIDER_DEFINITION, provider_definition.json); fno_gt_overlay.py text updated; added FNO_평가정의_확인_20261109.md. Scores, thresholds, contract ids and decisions unchanged.",
   "updated_date": "2026-11-09"
 }
