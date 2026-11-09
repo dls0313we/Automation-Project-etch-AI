@@ -16,8 +16,9 @@ Python 3.11 이상을 준비한다. 이 폴더의 실행에는 추가 패키지�
 
 ```text
 cd prototypes/threshold_controller
-python -m unittest -v test_controller.py test_inspect_results.py test_harness.py test_fno_adapter.py test_mgn_adapter.py test_run_review.py test_mgn_geometry.py test_mgn_gt_overlay.py test_fno_gt_overlay.py
+python -m unittest -v test_controller.py test_inspect_results.py test_harness.py test_fno_adapter.py test_mgn_adapter.py test_run_review.py test_mgn_geometry.py test_mgn_gt_overlay.py test_fno_gt_overlay.py test_mock_retrain_loop.py
 python harness.py --demo
+python mock_retrain_loop.py
 ```
 
 가상 사례 5개는 차례대로 KEEP_CURRENT, RETRAIN_REQUEST, DATA_REVIEW, HOLD,
@@ -35,12 +36,13 @@ APPROVE_CANDIDATE를 만든다. 결과는 `harness_results/<실행시각>/`에 �
 | `thresholds_demo_relaxed.json` | MGN rollout 상한 완화 및 기준 버전 기록 시연 |
 | `harness_inputs/evaluations/` | 실제 측정값이 아닌 가상 평가 결과 |
 | `harness_inputs/scenarios.json` | 기본 시연 5개 |
-| `test_*.py` | 판정 15 + CSV 점검 11 + 하네스 14 + FNO 연결 21 + MGN 연결 17 + 통합 12 + 형상 검사 29 + MGN 정답 비교 11 + FNO 정답 비교 17 = 147개 검사 |
+| `test_*.py` | 판정 15 + CSV 점검 11 + 하네스 14 + FNO 연결 21 + MGN 연결 17 + 통합 12 + 형상 검사 29 + MGN 정답 비교 11 + FNO 정답 비교 17 + 모의 재학습 루프 11 = 158개 검사 |
 | `mgn_geometry.py` | 선택형 MGN 선분 교차·중첩·중복 연결 검사 |
 | `mgn_gt_overlay.py` | validation 사례의 예측·정답 형상 비교 보고서 |
 | `fno_gt_overlay.py` | FNO 샘플 SDF 경계와 정답 형상 비교 보고서 |
 | `inspect_results.py` | 기존 6epoch MGN 평가 CSV의 데이터/집계 점검 |
 | `examples/`, `run_demo.py` | 기존 판정기 사례 시연 |
+| `mock_retrain_loop.py`, `mock_loop_inputs/` | 모의 재학습 루프와 그 전용 가상 입력·시연용 기준 |
 
 ## 임계치 수정
 
@@ -179,9 +181,43 @@ python fno_gt_overlay.py
 - 제공된 샘플 3개 레시피만 확인하며 전체 validation 판정이 아니다. 바닥 CD는 측정 높이 기준이 미확정이라
   재계산하지 않는다. `reference_verified`는 `false`, 형상 이상 건수는 계속 미측정이다.
 
+## 모의 재학습 루프 (`mock_retrain_loop.py`, 2026-11-09)
+
+기존 판정기(`harness.judge` → `controller.decide`)를 그대로 써서 재학습 루프 전체 흐름을 **가상으로** 시연합니다.
+
+```text
+python mock_retrain_loop.py
+```
+
+흐름: 기존 모델 평가 → (판정이 `RETRAIN_REQUEST`일 때만) 재학습 요청 → 모의 학습 실행기 호출 →
+모의 후보 평가 → 기존 모델과 비교 → 교체 권고 또는 기존 모델 유지 → 전체 과정 기록.
+
+| 사례 | 결과 |
+|---|---|
+| 1. 기준 만족 | `NO_RETRAIN_NEEDED` — 재학습 요청 안 함 |
+| 2. 기준 초과 + 학습 데이터 준비, 개선 후보 | `RECOMMEND_REPLACEMENT` — 교체 권고(실제 교체 없음) |
+| 3. 후보 성능 악화 | `KEEP_CURRENT_AFTER_CANDIDATE` — 기존 모델 유지 |
+| 4a. 후보 평가값 누락 | `STOPPED_CANDIDATE_EVALUATION` — 중단, 이유 기록 |
+| 4b. 모의 학습 실패 | `STOPPED_TRAINING_FAILED` — 중단, 이유 기록 |
+| 5a. 기준이 임시(provisional) | `NOT_STARTED_HOLD` — 모의 학습 시작 안 함 |
+| 5b. 정답 검증 미완료 | `NOT_STARTED_HOLD` — 모의 학습 시작 안 함 |
+
+- 가상 평가값과 시연용 기준은 `mock_loop_inputs/`에 따로 있습니다(`scenarios.json`, `thresholds_mock*.json`,
+  `evaluations/`). 실제 FNO/MGN 결과, `thresholds_*_provisional.json`, 기존 HOLD 규칙은 읽거나 바꾸지 않습니다.
+- 모의 학습 실행기(`MockTrainer`)는 학습을 하지 않고 미리 적어 둔 가상 후보 평가 파일을 돌려줍니다.
+  `synthetic_demo` 자료와 `RETRAIN_REQUEST` 판정일 때만 실행되며, 실제 자료처럼 보이면 거부합니다.
+- 기록의 각 단계에 `mock_executed`(가상 실행)와 `real_executed`(실제 실행)를 따로 남깁니다.
+  실제 학습·실제 모델 교체는 항상 `False`이며, 교체는 권고(`recommended`)만 하고 실행(`executed`)하지 않습니다.
+- 결과: `mock_loop_results/실행시각/` — `report.txt`(읽기용), `summary.json`(사례별 결과),
+  `scenarios/<사례>.json`(단계별 기록과 판정 원문). 예상 결과와 다르면 종료 코드 1입니다.
+  실행 결과 폴더는 Git 추적에서 제외합니다.
+- 실행 증거는 [검증 기록](../../reports/evidence/W6-02_mock_retrain_loop_20261109.md)에 있습니다.
+- [제안] 모의 사례의 수치·기준은 흐름 시연용 가상 값이며 실제 MGN/FNO 성능이나 공식 기준이 아닙니다.
+
 ## 기존 파이프라인과 관계
 
 이 프로토타입의 판정은 `src/etchpipe`의 회귀 게이트나 레지스트리와 아직 연결되지 않았다.
 기존 metrics/gate 스키마, 종료 코드, 공식 임계치 설정은 변경하지 않았다.
 W5-04/W6-02 관련 선행 시연이며 체크리스트 완료나 재학습 루프 완주를 뜻하지 않는다.
+모의 재학습 루프는 가상 흐름 시연이며 실제 재학습 루프 완주가 아니다.
 기존 설계와 임시 가정의 차이는 [DOC-HARNESS-001](../../docs/threshold-controller-prototype.md)에 기록한다.

@@ -36,8 +36,19 @@
     "thresholds_demo_relaxed.json": "91023c88a9b357292d681fc19b243b490da4a3cee456cac81ffba274bedc391a",
     "thresholds_fno_provisional.json": "4661d470176bc77574f23012835d786e02dd24d31ae2c972dbb333aa601ea4e4",
     "thresholds_mgn_provisional.json": "4e480b5b31ee8f7e85f3197d29c12ef8c9f90722de508601166207e5fc2384f8",
-    "임시기준_및_연결방법.md": "26f4ca40c6543bed3ae8d1c52efb4929e84704973e4b7e27b71cad33a7a87ede"
+    "임시기준_및_연결방법.md": "26f4ca40c6543bed3ae8d1c52efb4929e84704973e4b7e27b71cad33a7a87ede",
+    "mock_retrain_loop.py": "9ef4d10f9a37690e41ca60ff294f0b50492aa27faca1c8202699f1602bc8edd5",
+    "test_mock_retrain_loop.py": "92f0108078623c5989d7c82f0f5fe04a7da09f1d71993c01766ab46da1bcaa25",
+    "mock_loop_inputs/evaluations/candidate_better.json": "755159adbc110df14d71443df5d487676b9cdffc4d9a77beaf4331923d32d383",
+    "mock_loop_inputs/evaluations/candidate_missing_metric.json": "0f4ab103d5562f3a88ae231db0e28c617bcb5fd5c747987c29bb9c035197d1c8",
+    "mock_loop_inputs/evaluations/candidate_worse.json": "99b69fd3664aa7f0625b1db1cae5dbba4c1da80e4b537bf169593cbcc27ed95c",
+    "mock_loop_inputs/evaluations/current_ok.json": "cb65a35f5196d5aab1fde53c8ee5cadd78eaab4e8c70b774d3485e32b63d345f",
+    "mock_loop_inputs/evaluations/current_over_limit.json": "ef7686bda2c2fb86d130acf79d91dcd30c9ae6e0beaaa340d29404387c5b8528",
+    "mock_loop_inputs/evaluations/current_over_limit_unverified.json": "d22a3c80ec6b01213a5200d78c276a3d2238f0e149d9c7998ee9fdd48bf0db3a",
+    "mock_loop_inputs/scenarios.json": "7bbdc1f12d87ad260ac533382e4406e4b6e5ab489bcee489219aac439852903d",
+    "mock_loop_inputs/thresholds_mock.json": "c14134f92cdedc78122394ee4360d12967147ee216d92361783203d75de3bb1d",
+    "mock_loop_inputs/thresholds_mock_provisional.json": "51593d803a66c95be59a0854b031da7b2f07b99b151856f1694beec9b0178286"
   },
-  "note": "Python files in this copy may be formatted for repository lint. Original local files are unchanged. 2026-11-09: added FNO/MGN real-score adapters and run_review.py; the repository copy is ruff-formatted, local inputs are configured in local_paths.json (not committed). 2026-11-09 (2): added mgn_geometry.py (optional NPZ segment check) and mgn_gt_overlay.py (prediction vs ground-truth overlay); ground-truth data is not committed. 2026-11-09 (3): added fno_gt_overlay.py (FNO sample SDF contour vs ground truth); mgn_geometry.read_npy gained an optional allowed_ndim argument (default unchanged).",
+  "note": "Python files in this copy may be formatted for repository lint. Original local files are unchanged. 2026-11-09: added FNO/MGN real-score adapters and run_review.py; the repository copy is ruff-formatted, local inputs are configured in local_paths.json (not committed). 2026-11-09 (2): added mgn_geometry.py (optional NPZ segment check) and mgn_gt_overlay.py (prediction vs ground-truth overlay); ground-truth data is not committed. 2026-11-09 (3): added fno_gt_overlay.py (FNO sample SDF contour vs ground truth); mgn_geometry.read_npy gained an optional allowed_ndim argument (default unchanged). 2026-11-09 (4): added mock_retrain_loop.py (virtual retraining loop reusing harness.judge; no real training or model replacement) and mock_loop_inputs/ (synthetic evaluations and demo thresholds).",
   "updated_date": "2026-11-09"
 }

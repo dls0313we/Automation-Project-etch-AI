@@ -1,0 +1,82 @@
+{
+  "_notice": "모의 재학습 루프 사례. 모든 학습은 모의 실행이며 실제 학습·실제 모델 교체는 없습니다.",
+  "scenarios": [
+    {
+      "id": "1_meets_criteria",
+      "label": "1. 기준 만족 → 재학습 요청 안 함",
+      "current": "evaluations/current_ok.json",
+      "thresholds": "thresholds_mock.json",
+      "mock_training": {
+        "result": "candidate",
+        "candidate": "evaluations/candidate_better.json"
+      },
+      "expected": "NO_RETRAIN_NEEDED"
+    },
+    {
+      "id": "2_retrain_improves",
+      "label": "2. 기준 초과 + 재학습 조건 충족 → 모의 학습 → 개선 후보 교체 권고",
+      "current": "evaluations/current_over_limit.json",
+      "thresholds": "thresholds_mock.json",
+      "mock_training": {
+        "result": "candidate",
+        "candidate": "evaluations/candidate_better.json"
+      },
+      "expected": "RECOMMEND_REPLACEMENT"
+    },
+    {
+      "id": "3_candidate_worse",
+      "label": "3. 모의 학습 후보 성능 악화 → 기존 모델 유지",
+      "current": "evaluations/current_over_limit.json",
+      "thresholds": "thresholds_mock.json",
+      "mock_training": {
+        "result": "candidate",
+        "candidate": "evaluations/candidate_worse.json"
+      },
+      "expected": "KEEP_CURRENT_AFTER_CANDIDATE"
+    },
+    {
+      "id": "4a_candidate_metric_missing",
+      "label": "4a. 후보 평가값 누락 → 중단",
+      "current": "evaluations/current_over_limit.json",
+      "thresholds": "thresholds_mock.json",
+      "mock_training": {
+        "result": "candidate",
+        "candidate": "evaluations/candidate_missing_metric.json"
+      },
+      "expected": "STOPPED_CANDIDATE_EVALUATION"
+    },
+    {
+      "id": "4b_mock_training_failed",
+      "label": "4b. 모의 학습 실패 → 중단",
+      "current": "evaluations/current_over_limit.json",
+      "thresholds": "thresholds_mock.json",
+      "mock_training": {
+        "result": "fail",
+        "reason": "모의 실패: 학습 실행기가 체크포인트를 만들지 못함(가상)"
+      },
+      "expected": "STOPPED_TRAINING_FAILED"
+    },
+    {
+      "id": "5a_provisional_thresholds",
+      "label": "5a. 기준이 임시(provisional) → HOLD, 모의 학습 시작 안 함",
+      "current": "evaluations/current_over_limit.json",
+      "thresholds": "thresholds_mock_provisional.json",
+      "mock_training": {
+        "result": "candidate",
+        "candidate": "evaluations/candidate_better.json"
+      },
+      "expected": "NOT_STARTED_HOLD"
+    },
+    {
+      "id": "5b_reference_unverified",
+      "label": "5b. 정답 검증 미완료 → HOLD, 모의 학습 시작 안 함",
+      "current": "evaluations/current_over_limit_unverified.json",
+      "thresholds": "thresholds_mock.json",
+      "mock_training": {
+        "result": "candidate",
+        "candidate": "evaluations/candidate_better.json"
+      },
+      "expected": "NOT_STARTED_HOLD"
+    }
+  ]
+}

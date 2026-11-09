@@ -1,0 +1,26 @@
+{
+  "_notice": "모의 재학습 루프 시연용 가상 기준입니다. 실제 MGN/FNO 기준이나 thresholds_*_provisional.json과 무관합니다.",
+  "policies": [
+    {
+      "model_family": "MGN",
+      "eval_mode": "onestep",
+      "version": "mock-loop-MGN-onestep-v1",
+      "status": "demo",
+      "evaluation_contract_id": "mock-loop-MGN-onestep-v1",
+      "primary_metric": "mean_chamfer_um",
+      "max_metrics": {
+        "mean_chamfer_um": 0.2,
+        "depth_mae_um": 0.5,
+        "invalid_geometry_count": 0
+      },
+      "metric_units": {
+        "mean_chamfer_um": "um",
+        "depth_mae_um": "um",
+        "invalid_geometry_count": "count"
+      },
+      "max_relative_regression": 0.0,
+      "min_primary_improvement_relative": 0.05,
+      "denominator_floor": 1e-09
+    }
+  ]
+}
